@@ -151,7 +151,14 @@ function pool() {
 }
 function filterBox() {
   let chips;
-  if (S.by === "lesson") chips = [chip("Mind", S.sel.size === 0, () => { S.sel.clear(); R(); }), ...lessons.map(L => chip(L, S.sel.has(L), () => { S.sel.has(L) ? S.sel.delete(L) : S.sel.add(L); R(); }))];
+  // many lessons: a drop-down grouped by book stays readable where a row of chips would not
+  if (S.by === "lesson") {
+    const groups = new Map(), cnt = {};
+    for (const w of W) { const L = lk(w); cnt[L] = (cnt[L] || 0) + 1; if (!groups.has(w.book)) groups.set(w.book, new Map()); groups.get(w.book).set(L, w.lesson); }
+    chips = [h("select", { class: "inp", "aria-label": "Lecke", onchange: e => { S.sel = e.target.value ? new Set([e.target.value]) : new Set(); R(); } },
+      h("option", { value: "", selected: !S.sel.size }, `Összes lecke (${W.length} szó)`),
+      [...groups].map(([book, ls]) => h("optgroup", { label: book }, [...ls].map(([L, name]) => h("option", { value: L, selected: S.sel.has(L) }, `${name} (${cnt[L]})`)))))];
+  }
   else if (S.by === "topic") {
     const cnt = {}; for (const w of W) cnt[topicOf(w)] = (cnt[topicOf(w)] || 0) + 1;
     chips = [chip("Mind", S.topics.size === 0, () => { S.topics.clear(); R(); }), ...Object.keys(cnt).sort((a, b) => a.localeCompare(b, "hu")).map(t => chip(`${t} (${cnt[t]})`, S.topics.has(t), () => { S.topics.has(t) ? S.topics.delete(t) : S.topics.add(t); R(); }))];
