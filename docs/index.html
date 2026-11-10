@@ -188,7 +188,7 @@ function start(list) {
   S.view = "play"; R();
 }
 // ----- rewards -----
-const GOAL = 900, GOAL_WORDS = 25;            // 15 minutes a day keeps the streak alive; every further 15 minutes earns more football facts
+const GOAL = 600, GOAL_WORDS = 25, RWD = 600; // 10 minutes + 25 words keep the streak alive; every 10 minutes earns football facts, once 25 words are answered that day
 const PTS = { flash: 3, quiz: 6, type: 10 };   // harder recall earns more; flashcards are self-graded, so they earn least
 const LEVEL = 300, FREEZE_COST = 500, FREEZE_MAX = 2;
 const dk = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
@@ -216,15 +216,16 @@ function rec(w, ok, kind) {
   const d = today(); const cur = logDay(d) || { sec: 0, ans: 0, ok: 0, ses: 1 };
   const sec = Math.round(cur.sec + Math.min(60, (now - s.t) / 1000));
   let xp = (cur.xp || 0) + x;
-  const b0 = Math.floor(cur.sec / GOAL), b1 = Math.floor(sec / GOAL);
+  const b1 = Math.floor(sec / RWD), given = cur.rb != null ? cur.rb : Math.floor(cur.sec / RWD) * ((cur.ans || 0) >= GOAL_WORDS ? 1 : 0);
   const wasMet = met(cur), next = { ...cur, sec, ans: cur.ans + 1, ok: cur.ok + (ok ? 1 : 0), xp };
+  const blk = next.ans >= GOAL_WORDS && b1 > given ? b1 : 0; next.rb = blk || given;
   const nowMet = met(next); if (!wasMet && nowMet) { next.xp += 20; s.pts += 20; }
   LG[d] = next;
   s.t = now; save("szf-p", P); save("szf-log", LG);
-  if (b1 > b0 || (!wasMet && nowMet)) S.reward = reward(b1 > b0 ? b1 : 0, !wasMet && nowMet);
+  if (blk || (!wasMet && nowMet)) S.reward = reward(blk, !wasMet && nowMet);
 }
 const mins = sec => Math.round(sec / 60);
-// a day counts for the streak with 15 minutes AND 25 answered words
+// a day counts for the streak with 10 minutes AND 25 answered words
 const met = x => !!(x && x.sec >= GOAL && (x.ans || 0) >= GOAL_WORDS);
 const frozen = x => !!(x && x.fz);
 // a frozen day keeps the streak alive but does not add to it
@@ -271,10 +272,10 @@ function rewardModal() {
   return h("div", { class: "ov", role: "dialog", "aria-modal": "true" }, h("div", { class: "card pop" },
     h("div", { style: "text-align:center" },
       h("div", { style: "font-size:44px;line-height:1.1" }, r.badge ? badgeOf(r.badge)[0] : "⚽"),
-      h("h2", {}, r.badge ? `New badge: ${badgeOf(r.badge)[1]}!` : (r.block ? `${r.block * 15} minutes done!` : "Daily goal done!")),
+      h("h2", {}, r.badge ? `New badge: ${badgeOf(r.badge)[1]}!` : (r.block ? `${r.block * 10} minutes done!` : "Daily goal done!")),
       r.badge ? h("div", { class: "mu sm" }, `${r.badge}-day streak. Not many people get this far!`) : null,
       r.first ? h("div", { class: "sm", style: "font-weight:700;color:var(--g)" }, `🔥 Today counts: ${r.streak}-day streak · +20 points`) : null,
-      r.block ? h("div", { class: "mu sm" }, "Your reward: two football facts. Tap 🔊 to listen.") : h("div", { class: "mu sm" }, "15 minutes and 25 words today. Well done!")),
+      r.block ? h("div", { class: "mu sm" }, "Your reward: two football facts. Tap 🔊 to listen.") : h("div", { class: "mu sm" }, "10 minutes and 25 words today. Well done!")),
     factCard("From the history books", r.past, "p", r.hu), factCard("Happening now", r.now, "n", r.hu),
     r.block && !r.past && !r.now ? h("div", { class: "mu sm" }, "Football facts are coming in the next file.") : null,
     h("button", { class: "btn p", onclick: () => { S.reward = null; R(); } }, "Great, let's go on!")));
@@ -290,9 +291,9 @@ function streakCard() {
     h("div", { class: "row" },
       h("div", { class: "flame" + (done ? "" : " off") }, "🔥", h("b", { class: "tn" }, c)),
       h("div", { class: "grow" }, h("b", {}, c ? `${c} napos sorozat` : "Kezdj új sorozatot!"),
-        h("div", { class: "mu sm" }, done ? `Ma megvan! Még ${nb - c} nap a következő jelvényig.` : c ? `Ma még nincs meg a napi cél (${t.sec >= GOAL ? "" : "15 perc"}${t.sec < GOAL && (t.ans || 0) < GOAL_WORDS ? " + " : ""}${(t.ans || 0) >= GOAL_WORDS ? "" : "25 szó"} hiányzik), ne szakadjon meg!` : "Gyakorolj ma 15 percet és legalább 25 szót, és indul a sorozat.")),
+        h("div", { class: "mu sm" }, done ? `Ma megvan! Még ${nb - c} nap a következő jelvényig.` : c ? `Ma még nincs meg a napi cél (${t.sec >= GOAL ? "" : "10 perc"}${t.sec < GOAL && (t.ans || 0) < GOAL_WORDS ? " + " : ""}${(t.ans || 0) >= GOAL_WORDS ? "" : "25 szó"} hiányzik), ne szakadjon meg!` : "Gyakorolj ma 10 percet és legalább 25 szót, és indul a sorozat.")),
       h("div", { style: "text-align:right" }, h("b", { class: "tn" }, bal), h("div", { class: "mu sm" }, "pont"))),
-    h("div", {}, h("div", { class: "row sm" }, h("span", { class: "grow" }, "Mai cél: 15 perc · 15 percenként foci-tény jár ⚽"), h("span", { class: "tn" }, `${Math.min(15, Math.floor(t.sec / 60))} / 15 perc`)),
+    h("div", {}, h("div", { class: "row sm" }, h("span", { class: "grow" }, "Mai cél: 10 perc · 10 percenként foci-tény jár (25 szó után) ⚽"), h("span", { class: "tn" }, `${Math.min(10, Math.floor(t.sec / 60))} / 10 perc`)),
       h("div", { class: "bar goal" }, h("i", { style: `width:${Math.min(100, 100 * t.sec / GOAL)}%` }))),
     h("div", {}, h("div", { class: "row sm" }, h("span", { class: "grow" }, "Mai cél: 25 szó"), h("span", { class: "tn" }, `${Math.min(GOAL_WORDS, t.ans || 0)} / ${GOAL_WORDS} szó`)),
       h("div", { class: "bar goal" }, h("i", { style: `width:${Math.min(100, 100 * (t.ans || 0) / GOAL_WORDS)}%` }))),
@@ -400,7 +401,7 @@ function R0() {
         h("div", {}, h("b", { class: "tn" }, days.slice(-7).map(logDay).reduce((a, x) => a + ((x && x.xp) || 0), 0)), h("span", { class: "mu sm" }, "pont a héten"))),
       h("div", {}, h("div", { class: "lbl" }, "Gyakorlás az elmúlt 14 napban"),
         h("div", { class: "days" }, vals.map((v, i) => h("i", { class: met(logDay(days[i])) ? "g" : v ? "" : "z", title: days[i] + ": " + mins(v) + " perc", style: `height:${Math.max(2, 100 * v / mx)}%` }))),
-        h("div", { class: "mu sm", style: "margin-top:6px" }, "Zöld: megvolt a 15 perc és a 25 szó, ez a nap beszámít a sorozatba."))),
+        h("div", { class: "mu sm", style: "margin-top:6px" }, "Zöld: megvolt a 10 perc és a 25 szó, ez a nap beszámít a sorozatba."))),
       h("div", { class: "card" }, h("b", {}, "Jelentés küldése"),
         h("div", { class: "mu sm" }, "Küldd el a szüleidnek üzenetben. Így a saját szavaid is bekerülnek a közös szólistába, és a következő fájlban már ott lesznek."),
         h("div", { class: "row" },
@@ -415,7 +416,7 @@ function R0() {
       h("div", {}, h("button", { class: "btn", onclick: () => { S.rstMsg = restore(S.rst); if (S.rstMsg.startsWith("Visszatöltve")) S.rst = ""; R(); } }, "Visszatöltés"))));
     app.append(h("h2", {}, `⚽ My football facts (${GOT.length})`),
       GOT.length ? h("div", { class: "card" }, GOT.slice().reverse().map(g => { const f = ((FACTS[g.k] || []).find(x => x.t === g.t)) || g; return h("div", { class: "fact" }, h("div", { class: "row sm" }, h("span", { class: "mu grow" }, (g.k === "past" ? "History" : "Now") + " · " + g.d), sb(enOf(f)), chipT(g.team)), h("div", { class: "fen" }, enOf(f)), f.en ? h("details", {}, h("summary", { class: "mu sm" }, "Magyarul"), h("div", { class: "mu sm" }, f.t)) : null); }))
-        : h("div", { class: "mu sm" }, "Minden 15 perc gyakorlás után két foci-tényt kapsz. Itt gyűlnek."));
+        : h("div", { class: "mu sm" }, "Minden 10 perc gyakorlás után két foci-tényt kapsz, ha aznap már megvan a 25 szó. Itt gyűlnek."));
     return;
   }
   if (S.view === "home" || !S.s) {
@@ -451,7 +452,7 @@ function R0() {
       h("div", { class: "pts" }, `+${s.pts || 0} pont`),
       s.perfect ? h("div", { class: "sm", style: "font-weight:700;color:var(--g)" }, "Hibátlan kör! +30 bónusz") : null,
       (s.best || 0) >= 3 ? h("div", { class: "mu sm" }, `Leghosszabb jó sorozat: ${s.best}`) : null,
-      h("div", { class: "sm" }, met(t) ? `🔥 Ma megvan a napi cél, ${streak()} napos a sorozat.` : `Ma eddig ${Math.floor(t.sec / 60)} perc és ${t.ans || 0} szó. A sorozathoz 15 perc és 25 szó kell.`),
+      h("div", { class: "sm" }, met(t) ? `🔥 Ma megvan a napi cél, ${streak()} napos a sorozat.` : `Ma eddig ${Math.floor(t.sec / 60)} perc és ${t.ans || 0} szó. A sorozathoz 10 perc és 25 szó kell.`),
       h("div", { class: "mu" }, s.r / s.l.length >= .9 ? "Szuper, ez nagyon megy!" : s.r / s.l.length >= .6 ? "Szép munka!" : "Jó kezdet, még egy kör!"),
       s.newK && s.newK.length ? h("div", { class: "sm", style: "font-weight:700;color:var(--g)" }, `✓ Új tudott szavak: ${s.newK.map(x => x.en).join(", ")}`) : null,
       s.miss.length ? h("div", { class: "list", style: "text-align:left" }, s.miss.map(w => h("div", { class: "it" }, h("span", {}, h("b", {}, w.en), sb(w.en), tag(w)), h("span", {}, w.hu)))) : null,
