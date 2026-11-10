@@ -95,7 +95,7 @@ const STANDALONE = (window.matchMedia && matchMedia("(display-mode: standalone)"
 const IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 if (ONLINE_APP && "serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); S.bip = e; R(); });
-const S = { view: "home", by: "lesson", topics: new Set(), dsel: "", sel: new Set(), hard: false, incKnown: false, mode: "flash", dir: "en", count: 20, s: null, q: "", rep: "", add: { en: "", hu: "", L: "", topic: "" }, msg: null };
+const S = { view: "home", by: "lesson", topics: new Set(), dsel: "", sel: new Set(), hard: false, incKnown: false, mode: "flash", dir: "en", count: 25, s: null, q: "", rep: "", add: { en: "", hu: "", L: "", topic: "" }, msg: null };
 function h(t, a, ...k) { const e = document.createElement(t); for (const [n, v] of Object.entries(a || {})) { if (v == null || v === false) continue; if (n.startsWith("on")) e.addEventListener(n.slice(2), v); else if (n === "class") e.className = v; else if (n === "value") e.value = v; else e.setAttribute(n, v === true && !n.startsWith("aria-") ? "" : String(v)); } for (const c of k.flat(9)) if (c != null && c !== false) e.append(c.nodeType ? c : String(c)); return e; }
 const sh = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const n = s => (s || "").toLowerCase().trim();
@@ -432,7 +432,7 @@ function R0() {
         h("div", {}, h("div", { class: "lbl" }, "Irány"), h("div", { class: "seg" },
           [["en", "angol → magyar"], ["hu", "magyar → angol"], ["mix", "vegyes"]].map(([v, t]) => h("button", { "aria-pressed": S.dir === v, onclick: () => { S.dir = v; R(); } }, t)))),
         h("div", {}, h("div", { class: "lbl" }, "Hány szó?"), h("div", { class: "seg" },
-          [10, 20, 0].map(c => h("button", { "aria-pressed": S.count === c, onclick: () => { S.count = c; R(); } }, c || "mind")))),
+          [10, 25, 0].map(c => h("button", { "aria-pressed": S.count === c, onclick: () => { S.count = c; R(); } }, c || "mind")))),
         h("div", { class: "row" }, h("span", { class: "mu sm grow" }, `${p.length} szó közül`), h("button", { class: "btn p", disabled: !p.length, onclick: () => start() }, "Indulás"))));
     return;
   }
