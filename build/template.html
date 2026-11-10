@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Szófüzet</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#356C40"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Szófüzet"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root{--bg:#F3F6F3;--s:#fff;--ink:#17291C;--mu:#556B5A;--li:#D5E1D7;--bl:#356C40;--bs:#E2ECE4;--mk:#C9DFCC;--g:#356C40;--gs:#E2ECE4;--b:#C2363A;--bss:#FBE3E3;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0F1A12;--s:#172A1B;--ink:#EAF6EE;--mu:#A3B8A7;--li:#2B4631;--bl:#8CBF97;--bs:#24432B;--mk:#4C7D55;--g:#5BD394;--gs:#163D33;--b:#FF8A8D;--bss:#4A1F2A;color-scheme:dark}}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+button,input,textarea{font:inherit;color:inherit}
+.w{max-width:600px;margin:0 auto;padding:14px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+h1{font-size:24px;margin:0;font-weight:800}h1 span{background:linear-gradient(transparent 55%,var(--mk) 55%)}
+h2{font-size:19px;margin:0}
+.mu{color:var(--mu)}.sm{font-size:13px}.tn{font-variant-numeric:tabular-nums}
+.card{background:var(--s);border:1px solid var(--li);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.grow{flex:1;min-width:0}
+.btn{border:1px solid var(--li);background:var(--s);border-radius:999px;padding:10px 16px;font-weight:600;cursor:pointer}
+.btn.p{background:var(--bl);border-color:var(--bl);color:var(--s)}.btn.gh{border-color:transparent;background:none;color:var(--bl);padding-inline:8px}
+.btn.hd{border-color:var(--b);color:var(--b)}
+.btn:disabled{opacity:.5}
+.nav{display:flex;gap:4px;border-bottom:1px solid var(--li)}
+.nav button{flex:1;border:0;background:none;padding:8px 4px 10px;font-weight:600;color:var(--mu);border-bottom:3px solid transparent;cursor:pointer}
+.nav button[aria-pressed=true]{color:var(--ink);border-bottom-color:var(--bl)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--li);background:var(--s);border-radius:999px;padding:7px 12px;font-size:14px;cursor:pointer}
+.chip[aria-pressed=true],.seg button[aria-pressed=true]{background:var(--bl);border-color:var(--bl);color:var(--s)}
+.seg{display:flex;flex-wrap:wrap;gap:4px}.seg button{border:1px solid var(--li);background:var(--s);border-radius:999px;padding:7px 12px;font-weight:600;cursor:pointer}
+.lbl{font-size:13px;font-weight:600;color:var(--mu);margin-bottom:4px}
+.bar{height:8px;border-radius:4px;background:var(--li);overflow:hidden}.bar i{display:block;height:100%;background:var(--bl)}
+.fc{min-height:220px;border-radius:20px;border:1px solid var(--li);background:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;text-align:center;cursor:pointer}
+.fc.back{background:var(--bs)}
+.big{font-size:32px;font-weight:800;line-height:1.15;overflow-wrap:anywhere}
+.ex{font-style:italic;color:var(--mu);font-size:14px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{text-align:left;border:1px solid var(--li);background:var(--s);border-radius:12px;padding:13px 14px;cursor:pointer}
+.opt.ok{background:var(--gs);border-color:var(--g)}.opt.no{background:var(--bss);border-color:var(--b)}
+.list{background:var(--s);border:1px solid var(--li);border-radius:14px}
+.it{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:9px 14px;border-bottom:1px solid var(--li)}.it:last-child{border:0}
+.it b{font-weight:600}
+.tag{display:inline-block;font-size:11px;font-weight:700;color:var(--b);background:var(--bss);border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:1px}
+.inp{width:100%;border:1px solid var(--li);background:var(--s);border-radius:10px;padding:10px 12px}
+.days{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;align-items:end;height:90px}
+.days i{display:block;background:var(--bl);border-radius:3px 3px 0 0;min-height:2px}
+.days i.z{background:var(--li)}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px 8px;text-align:center}
+.stat b{display:block;font-size:24px;font-weight:800}
+.warn{background:var(--bss);color:var(--b);border-radius:10px;padding:10px 12px;font-size:14px}
+.say{border:0;background:none;cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;vertical-align:middle;border-radius:8px}
+.fb{border-radius:10px;padding:10px 12px;font-size:15px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.fb.ok{background:var(--gs)}.fb.no{background:var(--bss)}
+.it3{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;padding:6px 14px;border-bottom:1px solid var(--li)}.it3:last-child{border:0}
+.fire{gap:10px}.flame{display:flex;align-items:center;gap:2px;font-size:28px;line-height:1}.flame b{font-size:26px;font-weight:800}.flame.off{filter:grayscale(1);opacity:.55}
+.bar.goal i{background:var(--g)}.days i.g{background:var(--g)}
+.pts{font-size:22px;font-weight:800;color:var(--bl)}
+.ov{position:fixed;inset:0;background:rgba(6,30,16,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}
+.pop{width:100%;max-width:440px;max-height:90vh;overflow:auto}
+.fact{border:1px solid var(--li);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.team{background:var(--bl);color:var(--s);border-radius:999px;padding:1px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.fen{font-size:16px;font-weight:600;line-height:1.4}
+.inst{border-color:var(--bl);background:var(--bs)}
+.kn{border:1px solid var(--li);background:var(--s);border-radius:999px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;color:var(--mu);white-space:nowrap}.kn.on{background:var(--g);border-color:var(--g);color:var(--s)}.it3.kd b{opacity:.75}
+.badges{display:flex;gap:6px;flex-wrap:wrap}.badge{background:var(--bs);border-radius:999px;padding:4px 10px;font-size:13px;font-weight:600}
+</style></head><body><div class="w" id="app"></div>
+<script>
+const DATA = __DATA__;
+const app = document.getElementById("app");
+const K = w => w.book + "|" + w.lesson + "|" + w.en;
+let STORE_OK = true;
+function load(k, d) { try { return JSON.parse(localStorage.getItem(k) || "null") || d; } catch (e) { STORE_OK = false; return d; } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { STORE_OK = false; } }
+let P = load("szf-p", {}), LG = load("szf-log", {}), OWN = load("szf-own", []);
+let FZ = load("szf-fz", { n: 0, spent: 0 }), BD = load("szf-badges", []), FS = load("szf-fs", { p: [], n: [], tp: 0, tn: 0 }), GOT = load("szf-got", []);
+const FACTS = DATA.facts || { past: [], now: [] };
+// own words that already came back in a newer file are not kept twice
+const dataKeys = new Set(DATA.words.map(K));
+if (OWN.some(o => dataKeys.has(K(o)))) { OWN = OWN.filter(o => !dataKeys.has(K(o))); save("szf-own", OWN); }
+const lk = w => w.book + " · " + w.lesson;
+const OWN_BOOK = "Saját", OWN_LESSON = "Saját szavak", OWN_L = OWN_BOOK + " · " + OWN_LESSON;
+let W = [], lessons = [];
+function rebuild() { W = [...DATA.words, ...OWN]; lessons = [...new Set(W.map(lk))]; }
+rebuild();
+// progress: the newer of this phone's record and what came with the file
+function pr(w) { const l = P[K(w)]; const e = w.kl ? { b: w.kb || 0, r: w.kr || 0, w: w.kw || 0, l: w.kl } : null; if (l && (!e || l.l >= e.l)) return l; return e || { b: 0, r: 0, w: 0, l: 0 }; }
+const box = w => pr(w).b;
+// "tudom": marked by hand (k = 1), sent marked from the notebook (w.known), or answered right 4 times in a row (box 4)
+const known = w => { const k = (P[K(w)] || {}).k; return k === 1 || (k !== 0 && !!w.known) || box(w) >= 4; };
+function setKnown(w, on) { const p = pr(w); P[K(w)] = { ...p, ...(P[K(w)] || {}), b: on ? p.b : Math.min(p.b, 3), k: on ? 1 : 0, l: Date.now() }; save("szf-p", P); }
+const hard = w => { const p = pr(w); return !known(w) && p.w > 0 && p.b < 3; };
+function logDay(d) { const a = LG[d], b = (DATA.log || {})[d]; if (a && b) return (a.ans >= b.ans ? a : b); return a || b || null; }
+function allDays() { return [...new Set([...Object.keys(LG), ...Object.keys(DATA.log || {})])].sort(); }
+const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+// ----- installed app -----
+const ONLINE_APP = location.protocol === "https:";
+const STANDALONE = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+const IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if (ONLINE_APP && "serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); S.bip = e; R(); });
+const S = { view: "home", by: "lesson", topics: new Set(), dsel: "", sel: new Set(), hard: false, incKnown: false, mode: "flash", dir: "en", count: 20, s: null, q: "", rep: "", add: { en: "", hu: "", L: "", topic: "" }, msg: null };
+function h(t, a, ...k) { const e = document.createElement(t); for (const [n, v] of Object.entries(a || {})) { if (v == null || v === false) continue; if (n.startsWith("on")) e.addEventListener(n.slice(2), v); else if (n === "class") e.className = v; else if (n === "value") e.value = v; else e.setAttribute(n, v === true && !n.startsWith("aria-") ? "" : String(v)); } for (const c of k.flat(9)) if (c != null && c !== false) e.append(c.nodeType ? c : String(c)); return e; }
+const sh = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const n = s => (s || "").toLowerCase().trim();
+const tag = w => hard(w) ? h("span", { class: "tag" }, "nehéz") : null;
+
+// ----- pronunciation -----
+const CAN_SAY = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+function say(t, e) { if (e) e.stopPropagation(); try { const u = new SpeechSynthesisUtterance(t); u.lang = "en-GB"; u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (_) {} }
+const sb = t => CAN_SAY && t ? h("button", { class: "say", type: "button", "aria-label": "Kiejtés: " + t, title: "Meghallgatom", onclick: e => say(t, e) }, "🔊") : null;
+
+// ----- typed answers -----
+function fold(s) { return (s || "").toString().toLowerCase().replace(/[’‘`]/g, "'").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9' ]+/g, " ").replace(/\s+/g, " ").trim(); }
+function clean(s, en) { let x = (s || "").toLowerCase().replace(/[’‘`]/g, "'").replace(/\([^)]*\)/g, " ").replace(/[.!?]+$/, "").replace(/\s+/g, " ").trim(); if (en) x = x.replace(/^to /, ""); return x; }
+function lev(a, b) { if (Math.abs(a.length - b.length) > 1) return 2; const d = []; for (let i = 0; i <= a.length; i++) d[i] = [i]; for (let j = 1; j <= b.length; j++) d[0][j] = j; for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length]; }
+// lenient match: every typed word must match a word of one accepted meaning (endings allowed),
+// and it must cover at least half of that meaning ("nagyobbá válik" ~ "nagyobb léptékűvé válik");
+// typing English must cover the whole phrase, so "give" is not "give up". Close prefixes need 80 %
+// in common, so "kölcsönad" never passes for "kölcsönkér".
+const toks = s => fold(s).split(" ").filter(t => t.length >= 2);
+function stemEq(a, b) { if (a === b) return true; const m = Math.min(a.length, b.length); if (m < 4 || Math.abs(a.length - b.length) > 3) return false; const k = Math.max(4, Math.ceil(m * 0.8)); return a.slice(0, k) === b.slice(0, k); }
+function loose(input, alt, strict) { const it = toks(input), at = toks(alt); if (!it.length || !at.length) return false; if (!it.every(t => at.some(a => stemEq(t, a)))) return false; const cov = at.filter(a => it.some(t => stemEq(t, a))).length; return cov >= (strict ? at.length : Math.ceil(at.length / 2)); }
+function chk(input, target, en, extra) {
+  const alts = [...(target || "").split(/[,;\/]/), ...(extra || [])].map(x => x.trim()).filter(Boolean);
+  const x = clean(input, en); if (!x) return { empty: true };
+  if (alts.some(t => clean(t, en) === x)) return { ok: true };
+  const f = fold(x);
+  if (en) {
+    // typing English: spelling counts, as in a school test; only case, a leading "to" and punctuation are forgiven
+    const a = alts.find(t => fold(clean(t, en)) === f); if (a) return { ok: true, note: "Jó! Pontosan így írjuk: " + a };
+    const b = alts.find(t => fold(clean(t, en)).length >= 4 && lev(fold(clean(t, en)), f) <= 1); if (b) return { ok: false, near: true, note: "Majdnem! Egy betű eltér. Helyesen: " + b };
+    return { ok: false };
+  }
+  // typing Hungarian: understanding counts, so any listed meaning passes, with endings, a typo or missing accents
+  const a = alts.find(t => fold(clean(t, en)) === f); if (a) return { ok: true, note: "Jó! Figyelj az ékezetekre: " + a };
+  const b = alts.find(t => fold(clean(t, en)).length >= 5 && lev(fold(clean(t, en)), f) <= 1); if (b) return { ok: true, note: "Jó, egy betű eltér. Pontosan: " + b };
+  const c = alts.find(t => loose(x, clean(t, en), false)); if (c) return { ok: true, note: "Jó! A szófüzetben így szerepel: " + c };
+  return { ok: false };
+}
+
+// ----- what to practise: by lesson, by topic, or by when the words were added -----
+const TOPICS = ["Család és barátok", "Iskola", "Sport", "Étel és ital", "Utazás", "Időjárás", "Természet és állatok", "Otthon", "Város és közlekedés", "Munka", "Érzések", "Test és egészség", "Szabadidő", "Technika", "Ruha", "Idő és dátum", "Egyéb"];
+const topicOf = w => (w.topic || "").trim() || "Egyéb";
+const dayOfMs = ms => { const d = new Date(ms); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+function dateMatch(c, sel) { if (!sel) return true; if (!c) return false; if (sel === "today") return dayOfMs(c) === today(); if (sel === "7" || sel === "30") return Date.now() - c <= +sel * 864e5; return dayOfMs(c) === sel; }
+const dlabel = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("hu-HU", { month: "short", day: "numeric" }); };
+const chip = (t, on, f) => h("button", { class: "chip", "aria-pressed": on, onclick: f }, t);
+function pool() {
+  let ws = W.slice();
+  if (S.by === "lesson" && S.sel.size) ws = ws.filter(w => S.sel.has(lk(w)));
+  if (S.by === "topic" && S.topics.size) ws = ws.filter(w => S.topics.has(topicOf(w)));
+  if (S.by === "date" && S.dsel) ws = ws.filter(w => dateMatch(w.c, S.dsel));
+  if (S.hard) ws = ws.filter(hard); return ws;
+}
+function filterBox() {
+  let chips;
+  if (S.by === "lesson") chips = [chip("Mind", S.sel.size === 0, () => { S.sel.clear(); R(); }), ...lessons.map(L => chip(L, S.sel.has(L), () => { S.sel.has(L) ? S.sel.delete(L) : S.sel.add(L); R(); }))];
+  else if (S.by === "topic") {
+    const cnt = {}; for (const w of W) cnt[topicOf(w)] = (cnt[topicOf(w)] || 0) + 1;
+    chips = [chip("Mind", S.topics.size === 0, () => { S.topics.clear(); R(); }), ...Object.keys(cnt).sort((a, b) => a.localeCompare(b, "hu")).map(t => chip(`${t} (${cnt[t]})`, S.topics.has(t), () => { S.topics.has(t) ? S.topics.delete(t) : S.topics.add(t); R(); }))];
+  } else {
+    const days = {}; for (const w of W) if (w.c) { const k = dayOfMs(w.c); days[k] = (days[k] || 0) + 1; }
+    chips = [["", "Mind"], ["today", "Ma"], ["7", "Elmúlt 7 nap"], ["30", "Elmúlt 30 nap"]].map(([v, t]) => chip(t, S.dsel === v, () => { S.dsel = v; R(); }))
+      .concat(Object.keys(days).sort().reverse().slice(0, 8).map(k => chip(`${dlabel(k)} (${days[k]})`, S.dsel === k, () => { S.dsel = k; R(); })));
+  }
+  return h("div", {}, h("div", { class: "lbl" }, "Mit gyakorolsz?"),
+    h("div", { class: "seg" }, [["lesson", "Lecke"], ["topic", "Témakör"], ["date", "Dátum"]].map(([v, t]) => h("button", { "aria-pressed": S.by === v, onclick: () => { S.by = v; R(); } }, t))),
+    h("div", { class: "chips", style: "margin-top:8px" }, chips),
+    S.by === "date" ? h("div", { class: "mu sm", style: "margin-top:4px" }, "Aszerint, mikor került be a szó a szófüzetbe.") : null);
+}
+// what goes into a round: missed words first, then the not-yet-known ones from the weakest up;
+// known words come back only for review, about one in five while there is enough left to learn
+function pickRound(all, count) {
+  const n = count || all.length, pri = w => (hard(w) ? 0 : 1);
+  const learn = sh(all.filter(w => !known(w))).sort((a, b) => (pri(a) - pri(b)) || (box(a) - box(b)));
+  const kn = sh(all.filter(known));
+  const kCap = Math.min(kn.length, learn.length >= n ? Math.round(n * 0.2) : n - learn.length);
+  return learn.slice(0, n - kCap).concat(kn.slice(0, kCap));
+}
+function start(list) {
+  const l = list ? sh(list) : sh(pickRound(pool(), S.count));
+  S.s = { l: l.map(w => ({ w, d: S.dir === "mix" ? (Math.random() < .5 ? "en" : "hu") : S.dir })), i: 0, r: 0, miss: [], f: false, pk: null, t: Date.now(), ty: "", ck: null };
+  const d = today(); const cur = logDay(d) || { sec: 0, ans: 0, ok: 0, ses: 0 }; LG[d] = { ...cur, ses: cur.ses + 1 }; save("szf-log", LG);
+  S.view = "play"; R();
+}
+// ----- rewards -----
+const GOAL = 900, GOAL_WORDS = 25;            // 15 minutes a day keeps the streak alive; every further 15 minutes earns more football facts
+const PTS = { flash: 3, quiz: 6, type: 10 };   // harder recall earns more; flashcards are self-graded, so they earn least
+const LEVEL = 300, FREEZE_COST = 500, FREEZE_MAX = 2;
+const dk = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const BADGES = [["⚽", "Starting XI"], ["🥅", "Goal Machine"], ["🎩", "Hat-trick Hero"], ["🎖️", "Captain"], ["🏆", "Champion"], ["💚", "Fradi Heart"], ["🖤", "Nerazzurro"], ["❤️", "You'll Never Walk Alone"], ["⭐", "CR7"], ["👑", "Legend"]];
+const badgeOf = n => { const i = n / 10 - 1; return i < BADGES.length ? BADGES[i] : ["👑", "Legend " + n]; };
+const TEAM = { fradi: ["Fradi", "#1B7F3B"], inter: ["Inter", "#1E4FB0"], lfc: ["Liverpool", "#C8102E"], cr7: ["CR7", "#A86F00"] };
+const ORDER = ["fradi", "inter", "lfc", "cr7"];
+function addXp(x) { const d = today(); const cur = logDay(d) || { sec: 0, ans: 0, ok: 0, ses: 1 }; LG[d] = { ...cur, xp: (cur.xp || 0) + x }; save("szf-log", LG); }
+function totalXp() { return allDays().reduce((a, d) => a + ((logDay(d) || {}).xp || 0), 0); }
+const balance = () => totalXp() - (FZ.spent || 0);
+function rec(w, ok, kind) {
+  const s = S.s; if (ok) s.r++; else s.miss.push(w);
+  const wasHard = hard(w);
+  const p = pr(w); const now = Date.now();
+  const wasKnown = known(w), prev = P[K(w)] || {};
+  P[K(w)] = { ...prev, b: ok ? Math.min(4, p.b + 1) : 0, r: p.r + (ok ? 1 : 0), w: p.w + (ok ? 0 : 1), l: now, ...(ok ? {} : { k: 0 }) };
+  if (!wasKnown && known(w)) (s.newK = s.newK || []).push(w);
+  let x = 0, bonus = "";
+  if (ok) {
+    x = PTS[kind] || 3; if (wasHard) { x += Math.ceil(x / 2); bonus = "nehéz szó"; }
+    s.cb = (s.cb || 0) + 1; s.best = Math.max(s.best || 0, s.cb);
+    if (s.cb % 5 === 0) { x += 10; bonus = `${s.cb} jó egymás után`; }
+  } else s.cb = 0;
+  s.pts = (s.pts || 0) + x; s.last = ok ? { x, bonus } : null;
+  const d = today(); const cur = logDay(d) || { sec: 0, ans: 0, ok: 0, ses: 1 };
+  const sec = Math.round(cur.sec + Math.min(60, (now - s.t) / 1000));
+  let xp = (cur.xp || 0) + x;
+  const b0 = Math.floor(cur.sec / GOAL), b1 = Math.floor(sec / GOAL);
+  const wasMet = met(cur), next = { ...cur, sec, ans: cur.ans + 1, ok: cur.ok + (ok ? 1 : 0), xp };
+  const nowMet = met(next); if (!wasMet && nowMet) { next.xp += 20; s.pts += 20; }
+  LG[d] = next;
+  s.t = now; save("szf-p", P); save("szf-log", LG);
+  if (b1 > b0 || (!wasMet && nowMet)) S.reward = reward(b1 > b0 ? b1 : 0, !wasMet && nowMet);
+}
+const mins = sec => Math.round(sec / 60);
+// a day counts for the streak with 15 minutes AND 25 answered words
+const met = x => !!(x && x.sec >= GOAL && (x.ans || 0) >= GOAL_WORDS);
+const frozen = x => !!(x && x.fz);
+// a frozen day keeps the streak alive but does not add to it
+function streak() { let c = 0; const d = new Date(); for (let i = 0; i < 4000; i++) { const k = dk(d), x = logDay(k); if (met(x)) c++; else if (frozen(x) || (c === 0 && k === today())) {} else break; d.setDate(d.getDate() - 1); } return c; }
+// missed days since the last practised day are covered automatically, if there are enough freezes for all of them
+function applyFreezes() {
+  if (!FZ.n) return;
+  const d = new Date(); d.setDate(d.getDate() - 1); const gap = []; let found = false;
+  for (let i = 0; i < 60; i++) { const x = logDay(dk(d)); if (met(x) || frozen(x)) { found = met(x) || frozen(x); break; } gap.push(dk(d)); d.setDate(d.getDate() - 1); }
+  if (!found || !gap.length || gap.length > FZ.n) return;
+  for (const k of gap) { const cur = logDay(k) || { sec: 0, ans: 0, ok: 0, ses: 0 }; LG[k] = { ...cur, fz: 1 }; }
+  FZ.n -= gap.length; save("szf-fz", FZ); save("szf-log", LG); S.fzUsed = gap.length;
+}
+function pickFact(kind) {
+  const list = (FACTS[kind] || []).filter(f => f && f.t); if (!list.length) return null;
+  const k = kind === "past" ? "p" : "n", tk = kind === "past" ? "tp" : "tn";
+  let seen = new Set(FS[k] || []); if (list.every(f => seen.has(f.t))) seen = new Set();
+  const fresh = list.filter(f => !seen.has(f.t));
+  let f = null;
+  for (let i = 0; i < ORDER.length && !f; i++) { const team = ORDER[((FS[tk] || 0) + i) % ORDER.length]; f = fresh.find(x => x.team === team) || null; if (f) FS[tk] = ((FS[tk] || 0) + i + 1) % ORDER.length; }
+  if (!f) f = fresh[0];
+  seen.add(f.t); FS[k] = [...seen]; save("szf-fs", FS);
+  if (!GOT.some(g => g.t === f.t)) { GOT.push({ t: f.t, en: f.en || "", team: f.team, k: kind, d: today() }); save("szf-got", GOT); }
+  return f;
+}
+function reward(block, first) {
+  const r = { block, first, past: block ? pickFact("past") : null, now: block ? pickFact("now") : null, badge: null };
+  if (first) { r.streak = streak(); if (r.streak > 0 && r.streak % 10 === 0) { r.badge = r.streak; BD.push({ n: r.streak, d: today() }); save("szf-badges", BD); } }
+  return r;
+}
+const chipT = team => h("span", { class: "team" }, (TEAM[team] || ["Foci"])[0]);
+const enOf = f => f.en || f.t;
+// the fact itself in English; Hungarian only on request, so the reward is also reading practice
+function factCard(lbl, f, key, st) {
+  if (!f) return null;
+  return h("div", { class: "fact" },
+    h("div", { class: "row sm" }, h("b", { class: "grow" }, lbl), chipT(f.team)),
+    h("div", { class: "fen" }, enOf(f)),
+    h("div", { class: "row" }, sb(enOf(f)), f.en && f.t ? h("button", { class: "btn gh sm", onclick: () => { st[key] = !st[key]; R(); } }, st[key] ? "Elrejtem a magyart" : "Magyarul?") : null),
+    st[key] && f.en ? h("div", { class: "mu sm" }, f.t) : null);
+}
+function rewardModal() {
+  const r = S.reward; r.hu = r.hu || {};
+  return h("div", { class: "ov", role: "dialog", "aria-modal": "true" }, h("div", { class: "card pop" },
+    h("div", { style: "text-align:center" },
+      h("div", { style: "font-size:44px;line-height:1.1" }, r.badge ? badgeOf(r.badge)[0] : "⚽"),
+      h("h2", {}, r.badge ? `New badge: ${badgeOf(r.badge)[1]}!` : (r.block ? `${r.block * 15} minutes done!` : "Daily goal done!")),
+      r.badge ? h("div", { class: "mu sm" }, `${r.badge}-day streak. Not many people get this far!`) : null,
+      r.first ? h("div", { class: "sm", style: "font-weight:700;color:var(--g)" }, `🔥 Today counts: ${r.streak}-day streak · +20 points`) : null,
+      r.block ? h("div", { class: "mu sm" }, "Your reward: two football facts. Tap 🔊 to listen.") : h("div", { class: "mu sm" }, "15 minutes and 25 words today. Well done!")),
+    factCard("From the history books", r.past, "p", r.hu), factCard("Happening now", r.now, "n", r.hu),
+    r.block && !r.past && !r.now ? h("div", { class: "mu sm" }, "Football facts are coming in the next file.") : null,
+    h("button", { class: "btn p", onclick: () => { S.reward = null; R(); } }, "Great, let's go on!")));
+}
+function streakCard() {
+  const c = streak(), t = logDay(today()) || { sec: 0 }, done = met(t);
+  const xp = totalXp(), bal = balance(), lvl = Math.floor(xp / LEVEL) + 1, inL = xp % LEVEL;
+  const nb = (Math.floor(c / 10) + 1) * 10;
+  const full = FZ.n >= FREEZE_MAX, canBuy = bal >= FREEZE_COST && !full;
+  const groups = {}; for (const b of BD) groups[b.n] = (groups[b.n] || 0) + 1;
+  return h("div", { class: "card fire" },
+    S.fzUsed ? h("div", { class: "fb ok sm" }, `🧊 A sorozatvédő megmentette a sorozatodat (${S.fzUsed} kimaradt nap).`) : null,
+    h("div", { class: "row" },
+      h("div", { class: "flame" + (done ? "" : " off") }, "🔥", h("b", { class: "tn" }, c)),
+      h("div", { class: "grow" }, h("b", {}, c ? `${c} napos sorozat` : "Kezdj új sorozatot!"),
+        h("div", { class: "mu sm" }, done ? `Ma megvan! Még ${nb - c} nap a következő jelvényig.` : c ? `Ma még nincs meg a napi cél (${t.sec >= GOAL ? "" : "15 perc"}${t.sec < GOAL && (t.ans || 0) < GOAL_WORDS ? " + " : ""}${(t.ans || 0) >= GOAL_WORDS ? "" : "25 szó"} hiányzik), ne szakadjon meg!` : "Gyakorolj ma 15 percet és legalább 25 szót, és indul a sorozat.")),
+      h("div", { style: "text-align:right" }, h("b", { class: "tn" }, bal), h("div", { class: "mu sm" }, "pont"))),
+    h("div", {}, h("div", { class: "row sm" }, h("span", { class: "grow" }, "Mai cél: 15 perc · 15 percenként foci-tény jár ⚽"), h("span", { class: "tn" }, `${Math.min(15, Math.floor(t.sec / 60))} / 15 perc`)),
+      h("div", { class: "bar goal" }, h("i", { style: `width:${Math.min(100, 100 * t.sec / GOAL)}%` }))),
+    h("div", {}, h("div", { class: "row sm" }, h("span", { class: "grow" }, "Mai cél: 25 szó"), h("span", { class: "tn" }, `${Math.min(GOAL_WORDS, t.ans || 0)} / ${GOAL_WORDS} szó`)),
+      h("div", { class: "bar goal" }, h("i", { style: `width:${Math.min(100, 100 * (t.ans || 0) / GOAL_WORDS)}%` }))),
+    h("div", {}, h("div", { class: "row sm" }, h("span", { class: "grow" }, `${lvl}. szint`), h("span", { class: "mu tn" }, `${inL} / ${LEVEL}`)),
+      h("div", { class: "bar" }, h("i", { style: `width:${100 * inL / LEVEL}%` }))),
+    h("div", { class: "row sm" },
+      h("div", { class: "grow" }, "🧊 Sorozatvédő: ", h("b", { class: "tn" }, `${FZ.n} / ${FREEZE_MAX}`), h("div", { class: "mu" }, "Ha kimarad egy nap, automatikusan megvédi a sorozatot.")),
+      h("button", { class: "btn", disabled: !canBuy, onclick: () => { if (balance() < FREEZE_COST || FZ.n >= FREEZE_MAX) return; FZ.n++; FZ.spent = (FZ.spent || 0) + FREEZE_COST; save("szf-fz", FZ); R(); } }, full ? "Megvan mind" : `Veszek (${FREEZE_COST} pont)`)),
+    BD.length ? h("div", { class: "badges" }, Object.keys(groups).map(Number).sort((a, b) => a - b).map(n => { const [e, name] = badgeOf(n); return h("span", { class: "badge", title: `${n} napos sorozat` }, e + " " + name + (groups[n] > 1 ? " ×" + groups[n] : "")); })) : null);
+}
+function report() {
+  const days = allDays().slice(-60); const log = {}; for (const d of days) log[d] = logDay(d);
+  const p = W.filter(w => pr(w).l).map(w => { const x = pr(w), k = (P[K(w)] || {}).k; return [w.book, w.lesson, w.en, x.b, x.r, x.w, x.l, k === 1 || k === 0 ? k : null]; });
+  const nw = OWN.map(o => [o.book, o.lesson, o.en, o.hu, o.c, o.topic || ""]);
+  // answers he accepted himself go to the notebook too, so the word list stays the same in both places
+  const o = W.flatMap(w => [...((P[K(w)] || {}).alt || []).map(a => [w.book, w.lesson, w.en, "hu", a]), ...((P[K(w)] || {}).altEn || []).map(a => [w.book, w.lesson, w.en, "en", a])]);
+  save("szf-lastrep", Date.now());
+  const x = { bd: BD, fz: FZ, got: GOT };
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify({ v: 1, at: Date.now(), log, p, n: nw, o, x }))));
+  const last7 = days.filter(d => d > new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10)).map(d => log[d]);
+  const sec = last7.reduce((a, x) => a + x.sec, 0), ans = last7.reduce((a, x) => a + x.ans, 0), ok = last7.reduce((a, x) => a + x.ok, 0);
+  const hw = W.filter(hard).map(w => w.en);
+  return `Szófüzet jelentés (${new Date().toLocaleDateString("hu-HU")})\nSorozat: ${streak()} nap 🔥 · ${totalXp()} pont\nUtolsó 7 nap: ${last7.length} nap, ${mins(sec)} perc, ${ans} válasz, ${ans ? Math.round(100 * ok / ans) : 0}% jó\nNehéz szavak (${hw.length}): ${hw.slice(0, 15).join(", ")}${hw.length > 15 ? "…" : ""}${OWN.length ? `\nSaját új szavak: ${OWN.length}` : ""}${BD.length ? `\nJelvények: ${BD.length}` : ""}\n\nSZF1:${code}`;
+}
+// new phone: the parents' restore code brings back everything the reports carried
+function restore(text) {
+  const m = /SZF2:([A-Za-z0-9+\/=\s]+)/.exec(text || "");
+  if (!m) return "Nem találom a kódot. Az egész üzenetet másold be, a „SZF2:” résszel együtt.";
+  let r; try { r = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/\s+/g, ""))))); } catch (_) { return "A kód sérült. Kérd el újra."; }
+  let nw = 0;
+  for (const [b, l, en, kb, kr, kw, kl, kn] of (r.p || [])) {
+    const k = b + "|" + l + "|" + en, cur = P[k];
+    if (cur && (cur.l || 0) >= (kl || 0)) continue;
+    P[k] = { ...(cur || {}), b: +kb || 0, r: +kr || 0, w: +kw || 0, l: +kl || 0, ...(kn === 1 ? { k: 1 } : kn === 0 ? { k: 0 } : {}) }; nw++;
+  }
+  for (const [d, x] of Object.entries(r.log || {})) if (/^\d{4}-\d{2}-\d{2}$/.test(d) && (!LG[d] || (LG[d].ans || 0) < (x.ans || 0) || (x.fz && !LG[d].ans))) LG[d] = x;
+  const x = r.x || {};
+  for (const bd of (x.bd || [])) if (!BD.some(y => y.n === bd.n && y.d === bd.d)) BD.push(bd);
+  if (x.fz && !(FZ.spent || FZ.n)) FZ = x.fz;
+  for (const g of (x.got || [])) if (g && g.t && !GOT.some(y => y.t === g.t)) GOT.push(g);
+  save("szf-p", P); save("szf-log", LG); save("szf-badges", BD); save("szf-fz", FZ); save("szf-got", GOT);
+  return `Visszatöltve: ${nw} szó haladása, ${Object.keys(r.log || {}).length} nap gyakorlás, ${(x.bd || []).length} jelvény. Üdv újra!`;
+}
+function addOwn() {
+  const A = S.add; const en = A.en.trim().slice(0, 100), hu = A.hu.trim().slice(0, 100);
+  if (!en || !hu) { S.msg = { ok: false, t: "Az angol és a magyar szó is kell." }; R(); return; }
+  const L = A.L || OWN_L;
+  const src = W.find(w => lk(w) === L);
+  const book = src ? src.book : OWN_BOOK, lesson = src ? src.lesson : OWN_LESSON;
+  const wk = x => n(x).replace(/[’‘`]/g, "'").replace(/^to\s+/, "").replace(/[.!?,;:]+$/, "").replace(/\s+/g, " ");
+  const dup = W.find(w => wk(w.en) === wk(en));
+  if (dup) { S.msg = { ok: false, t: `Ez a szó már megvan: ${lk(dup)} (${dup.hu}).` }; R(); return; }
+  OWN.push({ en, hu, book, lesson, pos: "", example: "", topic: A.topic || "Egyéb", own: true, c: Date.now() }); save("szf-own", OWN); rebuild();
+  S.add = { en: "", hu: "", L, topic: A.topic }; S.msg = { ok: true, t: "Hozzáadva: " + en };
+  R(); const f = document.getElementById("a-en"); if (f) f.focus();
+}
+function R() { R0(); if (S.reward) app.append(rewardModal()); }
+function R0() {
+  app.replaceChildren(h("h1", {}, h("span", {}, "Szófüzet")));
+  if (!STORE_OK) app.append(h("div", { class: "warn" }, "Így megnyitva a telefon nem tudja megjegyezni a haladásodat. Nyisd meg a kezdőképernyőn lévő Szófüzet ikonról."));
+  if (ONLINE_APP && !STANDALONE && !load("szf-nohint", false) && S.view !== "play") app.append(h("div", { class: "card inst" },
+    h("b", {}, "📲 Tedd ki a Szófüzetet a kezdőképernyőre!"),
+    IOS ? h("div", { class: "sm" }, "Safariban koppints lent a Megosztás gombra (négyzet felfelé mutató nyíllal), aztán: Főképernyőhöz adás → Hozzáadás.")
+      : S.bip ? h("button", { class: "btn p", onclick: async () => { try { S.bip.prompt(); await S.bip.userChoice; } catch (_) {} S.bip = null; R(); } }, "Telepítés")
+      : h("div", { class: "sm" }, "Chrome-ban koppints a jobb felső ⋮ menüre, aztán: Hozzáadás a kezdőképernyőhöz (vagy: Alkalmazás telepítése)."),
+    h("div", { class: "mu sm" }, "Ezután mindig az ikonról nyisd meg, mert a pontjaid és a sorozatod ott vannak elmentve."),
+    h("div", {}, h("button", { class: "btn gh", onclick: () => { save("szf-nohint", true); R(); } }, "Rendben, megvan"))));
+  if (S.view !== "play") app.append(h("div", { class: "nav" }, [["home", "Gyakorlás"], ["add", "Új szó"], ["list", "Szólista"], ["log", "Napló"]].map(([v, t]) => h("button", { "aria-pressed": S.view === v, onclick: () => { S.view = v; S.msg = null; R(); } }, t))));
+  if (S.view === "add") {
+    const A = S.add; const opts = [...new Set([OWN_L, ...lessons])];
+    app.append(h("div", { class: "card" },
+      h("h2", {}, "Új szó felvétele"),
+      h("div", { class: "mu sm" }, "Ha órán vagy a könyvben új szót találsz, írd be ide. A jelentéssel a szüleidhez is eljut, és bekerül a közös szófüzetbe."),
+      h("div", {}, h("div", { class: "lbl" }, "Angolul"), h("input", { class: "inp", id: "a-en", autocomplete: "off", autocapitalize: "off", spellcheck: "false", value: A.en, oninput: e => A.en = e.target.value, onkeydown: e => { if (e.key === "Enter") { e.preventDefault(); const x = document.getElementById("a-hu"); if (x) x.focus(); } } })),
+      h("div", {}, h("div", { class: "lbl" }, "Magyarul"), h("input", { class: "inp", id: "a-hu", autocomplete: "off", value: A.hu, oninput: e => A.hu = e.target.value, onkeydown: e => { if (e.key === "Enter") { e.preventDefault(); addOwn(); } } })),
+      h("div", {}, h("div", { class: "lbl" }, "Témakör"), h("select", { class: "inp", id: "a-t", onchange: e => A.topic = e.target.value }, TOPICS.map(t => h("option", { value: t, selected: (A.topic || "Egyéb") === t }, t)))),
+      h("div", {}, h("div", { class: "lbl" }, "Melyik leckéhez?"), h("select", { class: "inp", id: "a-l", onchange: e => A.L = e.target.value }, opts.map(L => h("option", { value: L, selected: (A.L || OWN_L) === L }, L)))),
+      S.msg ? h("div", { class: "sm", style: `font-weight:600;color:var(${S.msg.ok ? "--g" : "--b"})` }, S.msg.t) : null,
+      h("div", { class: "row" }, h("span", { class: "grow" }), h("button", { class: "btn p", onclick: addOwn }, "Hozzáadás"))));
+    if (OWN.length) app.append(h("h2", {}, `Saját szavaim (${OWN.length})`), h("div", { class: "list" }, OWN.slice().reverse().map(o => h("div", { class: "it3" },
+      h("span", {}, h("b", {}, o.en), sb(o.en)), h("span", {}, o.hu),
+      h("button", { class: "btn gh", "aria-label": "Törlés: " + o.en, onclick: () => { OWN = OWN.filter(x => x !== o); save("szf-own", OWN); rebuild(); R(); } }, "×")))));
+    return;
+  }
+  if (!W.length) { app.append(h("div", { class: "card" }, "Még nincsenek szavak. Az Új szó fülön felvehetsz sajátot.", h("div", {}, h("button", { class: "btn p", onclick: () => { S.view = "add"; R(); } }, "Új szó")))); return; }
+  if (S.view === "list") {
+    app.append(h("input", { class: "inp", type: "search", id: "q", placeholder: "Keresés…", value: S.q, oninput: e => { S.q = e.target.value; R(); document.getElementById("q").focus(); } }));
+    const q = n(S.q);
+    for (const L of lessons) {
+      const ws = W.filter(w => lk(w) === L && (!q || n(w.en).includes(q) || n(w.hu).includes(q)));
+      if (!ws.length) continue;
+      app.append(h("h2", {}, L), h("div", { class: "list" }, ws.map(w => { const on = known(w); return h("div", { class: "it3" + (on ? " kd" : "") }, h("span", {}, h("b", {}, w.en), sb(w.en), tag(w)), h("span", {}, w.hu), h("button", { class: "kn" + (on ? " on" : ""), "aria-pressed": on, title: on ? "Tudod: csak néha jön elő ismétlésnek. Koppints, ha mégis gyakorolnád." : "Jelöld, ha már tudod", onclick: () => { setKnown(w, !on); R(); } }, on ? "✓ tudom" : "tudom?")); })));
+    }
+    return;
+  }
+  if (S.view === "log") {
+    const days = []; for (let i = 13; i >= 0; i--) { const d = new Date(Date.now() - i * 864e5); days.push(d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0")); }
+    const vals = days.map(d => (logDay(d) || {}).sec || 0); const mx = Math.max(300, ...vals);
+    const wk = days.slice(-7).map(logDay).filter(Boolean);
+    const canShare = !!navigator.share;
+    app.append(h("div", { class: "card" },
+      h("div", { class: "stat" },
+        h("div", {}, h("b", { class: "tn" }, streak()), h("span", { class: "mu sm" }, "napos sorozat 🔥")),
+        h("div", {}, h("b", { class: "tn" }, mins(wk.reduce((a, x) => a + x.sec, 0))), h("span", { class: "mu sm" }, "perc a héten")),
+        h("div", {}, h("b", { class: "tn" }, days.slice(-7).map(logDay).reduce((a, x) => a + ((x && x.xp) || 0), 0)), h("span", { class: "mu sm" }, "pont a héten"))),
+      h("div", {}, h("div", { class: "lbl" }, "Gyakorlás az elmúlt 14 napban"),
+        h("div", { class: "days" }, vals.map((v, i) => h("i", { class: met(logDay(days[i])) ? "g" : v ? "" : "z", title: days[i] + ": " + mins(v) + " perc", style: `height:${Math.max(2, 100 * v / mx)}%` }))),
+        h("div", { class: "mu sm", style: "margin-top:6px" }, "Zöld: megvolt a 15 perc és a 25 szó, ez a nap beszámít a sorozatba."))),
+      h("div", { class: "card" }, h("b", {}, "Jelentés küldése"),
+        h("div", { class: "mu sm" }, "Küldd el a szüleidnek üzenetben. Így a saját szavaid is bekerülnek a közös szófüzetbe, és a következő fájlban már ott lesznek."),
+        h("div", { class: "row" },
+          canShare ? h("button", { class: "btn p", onclick: async () => { S.rep = report(); try { await navigator.share({ text: S.rep }); S.copied = "shared"; } catch (e) { S.copied = null; } R(); } }, "Küldés") : null,
+          h("button", { class: canShare ? "btn" : "btn p", onclick: async () => { S.rep = report(); R(); const t = document.getElementById("rep"); try { await navigator.clipboard.writeText(S.rep); S.copied = true; } catch (e) { if (t) t.select(); S.copied = false; } R(); } }, "Jelentés másolása")),
+        S.rep ? h("textarea", { class: "inp", id: "rep", rows: 5, readonly: true, onfocus: e => e.target.select() }, S.rep) : null,
+        S.rep && S.copied !== null && S.copied !== undefined ? h("div", { class: "sm " + (S.copied ? "" : "mu") }, S.copied === "shared" ? "Ha elküldted, kész vagy." : S.copied ? "Kimásolva, most illeszd be egy üzenetbe." : "Jelöld ki a szöveget, és másold ki.") : null));
+    app.append(h("div", { class: "card" }, h("b", {}, "📲 Új telefon? Haladás visszatöltése"),
+      h("div", { class: "mu sm" }, "Kérd el a szüleidtől a visszaállító kódot, és másold be ide. Visszajön a haladásod, a pontjaid, a sorozatod és a jelvényeid."),
+      h("textarea", { class: "inp", id: "rst", rows: 3, placeholder: "SZF2:…", oninput: e => S.rst = e.target.value }, S.rst || ""),
+      S.rstMsg ? h("div", { class: "sm", style: "font-weight:600" }, S.rstMsg) : null,
+      h("div", {}, h("button", { class: "btn", onclick: () => { S.rstMsg = restore(S.rst); if (S.rstMsg.startsWith("Visszatöltve")) S.rst = ""; R(); } }, "Visszatöltés"))));
+    app.append(h("h2", {}, `⚽ My football facts (${GOT.length})`),
+      GOT.length ? h("div", { class: "card" }, GOT.slice().reverse().map(g => { const f = ((FACTS[g.k] || []).find(x => x.t === g.t)) || g; return h("div", { class: "fact" }, h("div", { class: "row sm" }, h("span", { class: "mu grow" }, (g.k === "past" ? "History" : "Now") + " · " + g.d), sb(enOf(f)), chipT(g.team)), h("div", { class: "fen" }, enOf(f)), f.en ? h("details", {}, h("summary", { class: "mu sm" }, "Magyarul"), h("div", { class: "mu sm" }, f.t)) : null); }))
+        : h("div", { class: "mu sm" }, "Minden 15 perc gyakorlás után két foci-tényt kapsz. Itt gyűlnek."));
+    return;
+  }
+  if (S.view === "home" || !S.s) {
+    const p = pool(); const hw = W.filter(hard);
+    app.append(streakCard());
+    app.append(h("div", { class: "mu sm" }, `${W.length} szó · ${W.filter(known).length} tudom ✓ · frissítve: ${DATA.date}`));
+    // weekly nudge: changes on this phone reach the notebook only with a report
+    const lastRep = load("szf-lastrep", 0), changed = OWN.some(o => o.c > lastRep) || Object.values(P).some(x => (x.l || 0) > lastRep);
+    if (changed && Date.now() - lastRep > 6 * 864e5) app.append(h("div", { class: "card row inst" },
+      h("div", { class: "grow" }, h("b", {}, "📨 Küldd el a heti jelentést!"), h("div", { class: "mu sm" }, "Így a saját szavaid, a „tudom” jelöléseid és a pontjaid bekerülnek a közös szófüzetbe.")),
+      h("button", { class: "btn p", onclick: () => { S.view = "log"; R(); } }, "Küldés")));
+    if (hw.length) app.append(h("div", { class: "card row" }, h("div", { class: "grow" }, h("b", {}, `${hw.length} nehéz szó`), h("div", { class: "mu sm" }, "Ezeket rontottad el legutóbb. Gyakorold őket még egy kicsit.")),
+      h("button", { class: "btn hd", onclick: () => start(hw.slice(0, 20)) }, "Gyakorlom")));
+    app.append(h("div", { class: "card" },
+        filterBox(),
+        h("label", { class: "row" }, h("input", { type: "checkbox", checked: S.hard, onchange: e => { S.hard = e.target.checked; R(); } }), "Csak a nehéz szavak"),
+        h("div", { class: "mu sm" }, "Előbb az jön, ami nem ment, aztán a még nem tudott szavak. A tudottakból csak néhány, ismétlésnek. Dolgozat előtt válaszd ki a leckét vagy a témát, és a „mind” lehetőséget."),
+        h("div", {}, h("div", { class: "lbl" }, "Hogyan?"), h("div", { class: "seg" },
+          [["flash", "Szókártya"], ["quiz", "Kvíz"], ["type", "Begépelés"]].map(([v, t]) => h("button", { "aria-pressed": S.mode === v, onclick: () => { S.mode = v; R(); } }, t)))),
+        S.mode === "type" ? h("div", { class: "mu sm" }, "Te írod be a választ. Ez a legnehezebb, de ettől jut eszedbe a szó beszéd közben is.") : null,
+        h("div", {}, h("div", { class: "lbl" }, "Irány"), h("div", { class: "seg" },
+          [["en", "angol → magyar"], ["hu", "magyar → angol"], ["mix", "vegyes"]].map(([v, t]) => h("button", { "aria-pressed": S.dir === v, onclick: () => { S.dir = v; R(); } }, t)))),
+        h("div", {}, h("div", { class: "lbl" }, "Hány szó?"), h("div", { class: "seg" },
+          [10, 20, 0].map(c => h("button", { "aria-pressed": S.count === c, onclick: () => { S.count = c; R(); } }, c || "mind")))),
+        h("div", { class: "row" }, h("span", { class: "mu sm grow" }, `${p.length} szó közül`), h("button", { class: "btn p", disabled: !p.length, onclick: () => start() }, "Indulás"))));
+    return;
+  }
+  const s = S.s;
+  if (s.i >= s.l.length) {
+    if (!s.done) { s.done = true; if (s.l.length >= 10 && s.r === s.l.length) { s.perfect = true; s.pts = (s.pts || 0) + 30; addXp(30); } }
+    const t = logDay(today()) || { sec: 0 };
+    app.append(h("div", { class: "card", style: "text-align:center" }, h("div", { class: "big" }, `${s.r} / ${s.l.length}`),
+      h("div", { class: "pts" }, `+${s.pts || 0} pont`),
+      s.perfect ? h("div", { class: "sm", style: "font-weight:700;color:var(--g)" }, "Hibátlan kör! +30 bónusz") : null,
+      (s.best || 0) >= 3 ? h("div", { class: "mu sm" }, `Leghosszabb jó sorozat: ${s.best}`) : null,
+      h("div", { class: "sm" }, met(t) ? `🔥 Ma megvan a napi cél, ${streak()} napos a sorozat.` : `Ma eddig ${Math.floor(t.sec / 60)} perc és ${t.ans || 0} szó. A sorozathoz 15 perc és 25 szó kell.`),
+      h("div", { class: "mu" }, s.r / s.l.length >= .9 ? "Szuper, ez nagyon megy!" : s.r / s.l.length >= .6 ? "Szép munka!" : "Jó kezdet, még egy kör!"),
+      s.newK && s.newK.length ? h("div", { class: "sm", style: "font-weight:700;color:var(--g)" }, `✓ Új tudott szavak: ${s.newK.map(x => x.en).join(", ")}`) : null,
+      s.miss.length ? h("div", { class: "list", style: "text-align:left" }, s.miss.map(w => h("div", { class: "it" }, h("span", {}, h("b", {}, w.en), sb(w.en), tag(w)), h("span", {}, w.hu)))) : null,
+      h("div", { class: "row", style: "justify-content:center" },
+        s.miss.length ? h("button", { class: "btn p", onclick: () => start(s.miss) }, "Hibásak újra") : null,
+        h("button", { class: "btn", onclick: () => start() }, "Új kör"), h("button", { class: "btn gh", onclick: () => { S.view = "home"; S.s = null; R(); } }, "Kész"))));
+    return;
+  }
+  const { w, d } = s.l[s.i]; const fr = d === "en" ? w.en : w.hu, bk = d === "en" ? w.hu : w.en;
+  app.append(h("div", { class: "row" }, h("button", { class: "btn gh", onclick: () => { S.view = "home"; S.s = null; R(); } }, "‹ Kilépés"), h("span", { class: "grow" }), h("span", { class: "sm tn", style: "font-weight:700" }, `${s.pts || 0} pont`), h("span", { class: "mu sm tn" }, `${s.i + 1} / ${s.l.length}`)),
+    h("div", { class: "bar" }, h("i", { style: `width:${100 * s.i / s.l.length}%` })));
+  if (s.last && s.last.bonus) app.append(h("div", { class: "sm", style: "text-align:center;font-weight:700;color:var(--g)" }, `+${s.last.x} pont · ${s.last.bonus}`));
+  if (S.mode === "flash") {
+    app.append(h("div", { class: "fc" + (s.f ? " back" : ""), onclick: () => { s.f = !s.f; R(); } },
+      h("div", { class: "mu sm" }, s.f ? (d === "en" ? "magyarul" : "angolul") : (d === "en" ? "angol" : "magyar"), tag(w)),
+      h("div", { class: "big" }, s.f ? bk : fr), (d === "en" || s.f) ? sb(w.en) : null, s.f && w.example ? h("div", { class: "ex" }, w.example) : null,
+      !s.f ? h("div", { class: "mu sm" }, "Koppints a megfordításhoz") : null));
+    if (s.f) app.append(h("div", { class: "g2" },
+      h("button", { class: "btn hd", onclick: () => { rec(w, false, "flash"); s.i++; s.f = false; R(); } }, "Még nem tudtam"),
+      h("button", { class: "btn", style: "color:var(--g);border-color:var(--g)", onclick: () => { rec(w, true, "flash"); s.i++; s.f = false; R(); } }, "Tudtam")),
+      h("div", { style: "text-align:center" }, h("button", { class: "btn gh sm", onclick: () => { rec(w, true, "flash"); setKnown(w, true); s.i++; s.f = false; R(); } }, "✓ Ezt már tudom (ritkábban kérdezi)")));
+  } else if (S.mode === "type") {
+    const enA = d === "hu";
+    // an answer the boy accepts himself is remembered on his phone, per direction, and passes next time
+    const altKey = enA ? "altEn" : "alt", mine = (P[K(w)] || {})[altKey] || [];
+    // a wrong answer is recorded only on "Következő", so "Szerintem ez is jó" can still turn it into a right one
+    const check = () => { const r = chk(s.ty || "", enA ? [w.en, ...(w.enAlt || [])].join(", ") : bk, enA, mine); if (r.empty) { const x = document.getElementById("ty"); if (x) x.focus(); return; } s.ck = r; if (r.ok) rec(w, true, "type"); else r.pending = true; R(); };
+    const next = () => { if (s.ck && s.ck.pending) rec(w, false, "type"); s.i++; s.ty = ""; s.ck = null; R(); };
+    const accept = () => { rec(w, true, "flash"); const e = P[K(w)] || {}, a = (s.ty || "").trim();
+      if (!(e[altKey] || []).includes(a)) e[altKey] = [...(e[altKey] || []), a].slice(-6); P[K(w)] = e; save("szf-p", P);
+      s.ck = { ok: true, note: "Elfogadva. Legközelebb ezt is jónak veszi." }; R(); };
+    app.append(h("div", { class: "card" },
+      h("div", { class: "mu sm", style: "text-align:center" }, enA ? "Hogy mondod angolul?" : "Mit jelent magyarul?", tag(w)),
+      h("div", { class: "big", style: "text-align:center" }, fr, d === "en" ? sb(w.en) : null),
+      h("input", { class: "inp", id: "ty", autocomplete: "off", autocapitalize: "off", autocorrect: "off", spellcheck: "false", placeholder: enA ? "Írd be angolul…" : "Írd be magyarul…", value: s.ty || "", disabled: s.ck ? true : null,
+        oninput: e => s.ty = e.target.value, onkeydown: e => { if (e.key === "Enter") { e.preventDefault(); check(); } } }),
+      s.ck ? null : h("div", { class: "row" }, h("button", { class: "btn gh", onclick: () => { s.ck = { ok: false }; rec(w, false, "type"); R(); } }, "Nem tudom"), h("span", { class: "grow" }), h("button", { class: "btn p", onclick: check }, "Ellenőrzés"))));
+    if (s.ck) app.append(h("div", { class: "fb " + (s.ck.ok ? "ok" : "no") }, s.ck.ok ? (s.ck.note || "Helyes!") : s.ck.near ? s.ck.note : ["A jó válasz: ", h("b", {}, bk)], sb(w.en)),
+      s.ck.pending && !s.ck.near && (s.ty || "").trim() ? h("div", { class: "row" }, h("span", { class: "mu sm grow" }, `Te ezt írtad: „${(s.ty || "").trim()}”. Ha szerinted ugyanazt jelenti:`), h("button", { class: "btn sm", onclick: accept }, "Szerintem ez is jó")) : null,
+      w.example ? h("div", { class: "ex" }, w.example) : null,
+      h("div", { class: "row" }, s.ck.ok ? h("button", { class: "btn gh sm", onclick: () => { setKnown(w, true); next(); } }, "✓ Ezt már tudom") : null, h("span", { class: "grow" }), h("button", { class: "btn p", id: "nx", onclick: next }, "Következő")));
+    setTimeout(() => { const el = document.getElementById(s.ck ? "nx" : "ty"); if (el) el.focus(); }, 0);
+  } else {
+    if (s.of !== s.i) {
+      const f = d === "en" ? "hu" : "en"; const seen = new Set([n(w[f])]); const wr = [];
+      const same = W.filter(x => x !== w && lk(x) === lk(w)), oth = W.filter(x => lk(x) !== lk(w));
+      for (const x of [...sh(same), ...sh(oth)]) { if (wr.length >= 3) break; if (!seen.has(n(x[f]))) { seen.add(n(x[f])); wr.push(x[f]); } }
+      s.o = sh([{ t: w[f], ok: true }, ...wr.map(t => ({ t, ok: false }))]); s.of = s.i; s.pk = null;
+    }
+    app.append(h("div", { class: "card" }, h("div", { class: "mu sm", style: "text-align:center" }, d === "en" ? "Mit jelent magyarul?" : "Hogy mondod angolul?", tag(w)),
+      h("div", { class: "big", style: "text-align:center" }, fr, d === "en" ? sb(w.en) : null),
+      s.o.map((o, i) => h("button", { class: "opt" + (s.pk != null ? (o.ok ? " ok" : s.pk === i ? " no" : "") : ""), onclick: () => { if (s.pk != null) return; s.pk = i; s.lok = o.ok; rec(w, o.ok, "quiz"); R(); } }, o.t))));
+    if (s.pk != null) app.append(h("div", { class: "row" }, h("b", { class: "grow", style: `color:var(${s.lok ? "--g" : "--b"})` }, s.lok ? "Helyes!" : "A jó válasz: " + bk), sb(w.en),
+      s.lok ? h("button", { class: "btn gh sm", onclick: () => { setKnown(w, true); s.i++; R(); } }, "✓ Tudom") : null,
+      h("button", { class: "btn p", onclick: () => { s.i++; R(); } }, "Következő")));
+  }
+}
+applyFreezes();
+R();
+</script></body></html>

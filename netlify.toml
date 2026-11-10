@@ -1,0 +1,4 @@
+# Kept only until the Netlify project is unlinked: it serves the same prebuilt docs/ folder that GitHub Pages serves.
+[build]
+  publish = "docs"
+  command = "echo 'docs/ is prebuilt'"
