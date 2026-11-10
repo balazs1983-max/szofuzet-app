@@ -1,0 +1,45 @@
+name: Átmásolás a szojatek oldalra
+
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**']
+  workflow_dispatch:
+
+concurrency:
+  group: sync-pages
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Forrás (szofuzet-app)
+        uses: actions/checkout@v4
+        with:
+          path: src
+
+      - name: Cél (szojatek/szojatek.github.io)
+        uses: actions/checkout@v4
+        with:
+          repository: szojatek/szojatek.github.io
+          token: ${{ secrets.SZOJATEK_TOKEN }}
+          path: dst
+
+      - name: docs/ átmásolása és feltöltése
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          rsync -a --delete src/docs/ dst/docs/
+          cd dst
+          git add -A docs
+          if git diff --cached --quiet; then
+            echo "Nincs változás."
+            exit 0
+          fi
+          git config user.name "szojatek"
+          git config user.email "szojatek@users.noreply.github.com"
+          SUBJ="$(printf '%s' "$MSG" | head -n1)"
+          [ -n "$SUBJ" ] || SUBJ="Frissítés $(date -u +%F)"
+          git commit -m "$SUBJ"
+          git push origin HEAD:main
