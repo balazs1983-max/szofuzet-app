@@ -156,7 +156,7 @@ function filterBox() {
     const groups = new Map(), cnt = {};
     for (const w of W) { const L = lk(w); cnt[L] = (cnt[L] || 0) + 1; if (!groups.has(w.book)) groups.set(w.book, new Map()); groups.get(w.book).set(L, w.lesson); }
     chips = [h("select", { class: "inp", "aria-label": "Lecke", onchange: e => { S.sel = e.target.value ? new Set([e.target.value]) : new Set(); R(); } },
-      h("option", { value: "", selected: !S.sel.size }, `Összes lecke (${W.length} szó)`),
+      h("option", { value: "", selected: !S.sel.size }, `Mind (összes lecke, ${W.length} szó)`),
       [...groups].map(([book, ls]) => h("optgroup", { label: book }, [...ls].map(([L, name]) => h("option", { value: L, selected: S.sel.has(L) }, `${name} (${cnt[L]})`)))))];
   }
   else if (S.by === "topic") {
