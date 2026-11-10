@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Szófüzet</title>
+<title>Szójáték</title>
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#356C40"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Szófüzet"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#356C40"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Szójáték"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
 :root{--bg:#F3F6F3;--s:#fff;--ink:#17291C;--mu:#556B5A;--li:#D5E1D7;--bl:#356C40;--bs:#E2ECE4;--mk:#C9DFCC;--g:#356C40;--gs:#E2ECE4;--b:#C2363A;--bss:#FBE3E3;color-scheme:light}
 @media (prefers-color-scheme:dark){:root{--bg:#0F1A12;--s:#172A1B;--ink:#EAF6EE;--mu:#A3B8A7;--li:#2B4631;--bl:#8CBF97;--bs:#24432B;--mk:#4C7D55;--g:#5BD394;--gs:#163D33;--b:#FF8A8D;--bss:#4A1F2A;color-scheme:dark}}
@@ -131,7 +131,7 @@ function chk(input, target, en, extra) {
   // typing Hungarian: understanding counts, so any listed meaning passes, with endings, a typo or missing accents
   const a = alts.find(t => fold(clean(t, en)) === f); if (a) return { ok: true, note: "Jó! Figyelj az ékezetekre: " + a };
   const b = alts.find(t => fold(clean(t, en)).length >= 5 && lev(fold(clean(t, en)), f) <= 1); if (b) return { ok: true, note: "Jó, egy betű eltér. Pontosan: " + b };
-  const c = alts.find(t => loose(x, clean(t, en), false)); if (c) return { ok: true, note: "Jó! A szófüzetben így szerepel: " + c };
+  const c = alts.find(t => loose(x, clean(t, en), false)); if (c) return { ok: true, note: "Jó! A Szójátékban így szerepel: " + c };
   return { ok: false };
 }
 
@@ -163,7 +163,7 @@ function filterBox() {
   return h("div", {}, h("div", { class: "lbl" }, "Mit gyakorolsz?"),
     h("div", { class: "seg" }, [["lesson", "Lecke"], ["topic", "Témakör"], ["date", "Dátum"]].map(([v, t]) => h("button", { "aria-pressed": S.by === v, onclick: () => { S.by = v; R(); } }, t))),
     h("div", { class: "chips", style: "margin-top:8px" }, chips),
-    S.by === "date" ? h("div", { class: "mu sm", style: "margin-top:4px" }, "Aszerint, mikor került be a szó a szófüzetbe.") : null);
+    S.by === "date" ? h("div", { class: "mu sm", style: "margin-top:4px" }, "Aszerint, mikor került be a szó a Szójátékba.") : null);
 }
 // what goes into a round: missed words first, then the not-yet-known ones from the weakest up;
 // known words come back only for review, about one in five while there is enough left to learn
@@ -308,7 +308,7 @@ function report() {
   const last7 = days.filter(d => d > new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10)).map(d => log[d]);
   const sec = last7.reduce((a, x) => a + x.sec, 0), ans = last7.reduce((a, x) => a + x.ans, 0), ok = last7.reduce((a, x) => a + x.ok, 0);
   const hw = W.filter(hard).map(w => w.en);
-  return `Szófüzet jelentés (${new Date().toLocaleDateString("hu-HU")})\nSorozat: ${streak()} nap 🔥 · ${totalXp()} pont\nUtolsó 7 nap: ${last7.length} nap, ${mins(sec)} perc, ${ans} válasz, ${ans ? Math.round(100 * ok / ans) : 0}% jó\nNehéz szavak (${hw.length}): ${hw.slice(0, 15).join(", ")}${hw.length > 15 ? "…" : ""}${OWN.length ? `\nSaját új szavak: ${OWN.length}` : ""}${BD.length ? `\nJelvények: ${BD.length}` : ""}\n\nSZF1:${code}`;
+  return `Szójáték jelentés (${new Date().toLocaleDateString("hu-HU")})\nSorozat: ${streak()} nap 🔥 · ${totalXp()} pont\nUtolsó 7 nap: ${last7.length} nap, ${mins(sec)} perc, ${ans} válasz, ${ans ? Math.round(100 * ok / ans) : 0}% jó\nNehéz szavak (${hw.length}): ${hw.slice(0, 15).join(", ")}${hw.length > 15 ? "…" : ""}${OWN.length ? `\nSaját új szavak: ${OWN.length}` : ""}${BD.length ? `\nJelvények: ${BD.length}` : ""}\n\nSZF1:${code}`;
 }
 // new phone: the parents' restore code brings back everything the reports carried
 function restore(text) {
@@ -344,10 +344,10 @@ function addOwn() {
 }
 function R() { R0(); if (S.reward) app.append(rewardModal()); }
 function R0() {
-  app.replaceChildren(h("h1", {}, h("span", {}, "Szófüzet")));
-  if (!STORE_OK) app.append(h("div", { class: "warn" }, "Így megnyitva a telefon nem tudja megjegyezni a haladásodat. Nyisd meg a kezdőképernyőn lévő Szófüzet ikonról."));
+  app.replaceChildren(h("h1", {}, h("span", {}, "Szójáték")));
+  if (!STORE_OK) app.append(h("div", { class: "warn" }, "Így megnyitva a telefon nem tudja megjegyezni a haladásodat. Nyisd meg a kezdőképernyőn lévő Szójáték ikonról."));
   if (ONLINE_APP && !STANDALONE && !load("szf-nohint", false) && S.view !== "play") app.append(h("div", { class: "card inst" },
-    h("b", {}, "📲 Tedd ki a Szófüzetet a kezdőképernyőre!"),
+    h("b", {}, "📲 Tedd ki a Szójátékot a kezdőképernyőre!"),
     IOS ? h("div", { class: "sm" }, "Safariban koppints lent a Megosztás gombra (négyzet felfelé mutató nyíllal), aztán: Főképernyőhöz adás → Hozzáadás.")
       : S.bip ? h("button", { class: "btn p", onclick: async () => { try { S.bip.prompt(); await S.bip.userChoice; } catch (_) {} S.bip = null; R(); } }, "Telepítés")
       : h("div", { class: "sm" }, "Chrome-ban koppints a jobb felső ⋮ menüre, aztán: Hozzáadás a kezdőképernyőhöz (vagy: Alkalmazás telepítése)."),
@@ -358,7 +358,7 @@ function R0() {
     const A = S.add; const opts = [...new Set([OWN_L, ...lessons])];
     app.append(h("div", { class: "card" },
       h("h2", {}, "Új szó felvétele"),
-      h("div", { class: "mu sm" }, "Ha órán vagy a könyvben új szót találsz, írd be ide. A jelentéssel a szüleidhez is eljut, és bekerül a közös szófüzetbe."),
+      h("div", { class: "mu sm" }, "Ha órán vagy a könyvben új szót találsz, írd be ide. A jelentéssel a szüleidhez is eljut, és bekerül a közös szólistába."),
       h("div", {}, h("div", { class: "lbl" }, "Angolul"), h("input", { class: "inp", id: "a-en", autocomplete: "off", autocapitalize: "off", spellcheck: "false", value: A.en, oninput: e => A.en = e.target.value, onkeydown: e => { if (e.key === "Enter") { e.preventDefault(); const x = document.getElementById("a-hu"); if (x) x.focus(); } } })),
       h("div", {}, h("div", { class: "lbl" }, "Magyarul"), h("input", { class: "inp", id: "a-hu", autocomplete: "off", value: A.hu, oninput: e => A.hu = e.target.value, onkeydown: e => { if (e.key === "Enter") { e.preventDefault(); addOwn(); } } })),
       h("div", {}, h("div", { class: "lbl" }, "Témakör"), h("select", { class: "inp", id: "a-t", onchange: e => A.topic = e.target.value }, TOPICS.map(t => h("option", { value: t, selected: (A.topic || "Egyéb") === t }, t)))),
@@ -395,7 +395,7 @@ function R0() {
         h("div", { class: "days" }, vals.map((v, i) => h("i", { class: met(logDay(days[i])) ? "g" : v ? "" : "z", title: days[i] + ": " + mins(v) + " perc", style: `height:${Math.max(2, 100 * v / mx)}%` }))),
         h("div", { class: "mu sm", style: "margin-top:6px" }, "Zöld: megvolt a 15 perc és a 25 szó, ez a nap beszámít a sorozatba."))),
       h("div", { class: "card" }, h("b", {}, "Jelentés küldése"),
-        h("div", { class: "mu sm" }, "Küldd el a szüleidnek üzenetben. Így a saját szavaid is bekerülnek a közös szófüzetbe, és a következő fájlban már ott lesznek."),
+        h("div", { class: "mu sm" }, "Küldd el a szüleidnek üzenetben. Így a saját szavaid is bekerülnek a közös szólistába, és a következő fájlban már ott lesznek."),
         h("div", { class: "row" },
           canShare ? h("button", { class: "btn p", onclick: async () => { S.rep = report(); try { await navigator.share({ text: S.rep }); S.copied = "shared"; } catch (e) { S.copied = null; } R(); } }, "Küldés") : null,
           h("button", { class: canShare ? "btn" : "btn p", onclick: async () => { S.rep = report(); R(); const t = document.getElementById("rep"); try { await navigator.clipboard.writeText(S.rep); S.copied = true; } catch (e) { if (t) t.select(); S.copied = false; } R(); } }, "Jelentés másolása")),
@@ -418,7 +418,7 @@ function R0() {
     // weekly nudge: changes on this phone reach the notebook only with a report
     const lastRep = load("szf-lastrep", 0), changed = OWN.some(o => o.c > lastRep) || Object.values(P).some(x => (x.l || 0) > lastRep);
     if (changed && Date.now() - lastRep > 6 * 864e5) app.append(h("div", { class: "card row inst" },
-      h("div", { class: "grow" }, h("b", {}, "📨 Küldd el a heti jelentést!"), h("div", { class: "mu sm" }, "Így a saját szavaid, a „tudom” jelöléseid és a pontjaid bekerülnek a közös szófüzetbe.")),
+      h("div", { class: "grow" }, h("b", {}, "📨 Küldd el a heti jelentést!"), h("div", { class: "mu sm" }, "Így a saját szavaid, a „tudom” jelöléseid és a pontjaid bekerülnek a közös szólistába.")),
       h("button", { class: "btn p", onclick: () => { S.view = "log"; R(); } }, "Küldés")));
     if (hw.length) app.append(h("div", { class: "card row" }, h("div", { class: "grow" }, h("b", {}, `${hw.length} nehéz szó`), h("div", { class: "mu sm" }, "Ezeket rontottad el legutóbb. Gyakorold őket még egy kicsit.")),
       h("button", { class: "btn hd", onclick: () => start(hw.slice(0, 20)) }, "Gyakorlom")));

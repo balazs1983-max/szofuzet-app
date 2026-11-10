@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Builds the son's practice app (docs/, served by GitHub Pages) from a Szófüzet data export.
+"""Builds the son's practice app (docs/, served by GitHub Pages) from a Szójáték data export.
 
 Usage: python3 build/build.py data.json
 
-data.json is what the Szófüzet artifact's database holds:
+data.json is what the Szójáték artifact's database holds:
   {"words": [{"id": ..., "en": ..., "hu": ..., "book": ..., "lesson": ..., "created": ..., ...}],
    "usage": [{"id": "YYYY-MM-DD", "sec": ..., "ans": ..., "ok": ..., "ses": ..., "xp": ..., "fz": ...}],
    "facts": {"updated": ..., "past": [...], "now": [...]}}
 
-It mirrors kidHtml() in the Szófüzet page: same word fields, same lesson order.
+It mirrors kidHtml() in the Szójáték page: same word fields, same lesson order.
 Prints CHANGED or UNCHANGED, so a caller knows whether a commit is needed.
 """
 import datetime

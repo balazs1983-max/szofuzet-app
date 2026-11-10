@@ -1,6 +1,6 @@
 {
- "name": "Szófüzet",
- "short_name": "Szófüzet",
+ "name": "Szójáték",
+ "short_name": "Szójáték",
  "description": "Angol szavak leckénként",
  "start_url": "./",
  "scope": "./",
