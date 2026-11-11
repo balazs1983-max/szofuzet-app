@@ -26,6 +26,7 @@ h2{font-size:19px;margin:0}
 .chip{border:1px solid var(--li);background:var(--s);border-radius:999px;padding:7px 12px;font-size:14px;cursor:pointer}
 .chip[aria-pressed=true],.seg button[aria-pressed=true]{background:var(--bl);border-color:var(--bl);color:var(--s)}
 .seg{display:flex;flex-wrap:wrap;gap:4px}.seg button{border:1px solid var(--li);background:var(--s);border-radius:999px;padding:7px 12px;font-weight:600;cursor:pointer}
+.seg.tch{display:grid;grid-auto-flow:column;grid-auto-columns:1fr}.seg.tch button{padding:12px 6px;font-size:16px}
 .lbl{font-size:13px;font-weight:600;color:var(--mu);margin-bottom:4px}
 .bar{height:8px;border-radius:4px;background:var(--li);overflow:hidden}.bar i{display:block;height:100%;background:var(--bl)}
 .fc{min-height:220px;border-radius:20px;border:1px solid var(--li);background:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;text-align:center;cursor:pointer}
@@ -79,6 +80,7 @@ const OWN_BOOK = "Saját", OWN_LESSON = "Saját szavak", OWN_L = OWN_BOOK + " ·
 let W = [], lessons = [];
 function rebuild() { W = [...DATA.words, ...OWN]; lessons = [...new Set(W.map(lk))]; }
 rebuild();
+const TW = () => S.tch ? W.filter(w => tchOf(w) === S.tch) : W;
 // progress: the newer of this phone's record and what came with the file
 function pr(w) { const l = P[K(w)]; const e = w.kl ? { b: w.kb || 0, r: w.kr || 0, w: w.kw || 0, l: w.kl } : null; if (l && (!e || l.l >= e.l)) return l; return e || { b: 0, r: 0, w: 0, l: 0 }; }
 const box = w => pr(w).b;
@@ -95,7 +97,10 @@ const STANDALONE = (window.matchMedia && matchMedia("(display-mode: standalone)"
 const IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 if (ONLINE_APP && "serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); S.bip = e; R(); });
-const S = { view: "home", by: "lesson", topics: new Set(), dsel: "", sel: new Set(), hard: false, incKnown: false, mode: "flash", dir: "en", count: 25, s: null, q: "", rep: "", add: { en: "", hu: "", L: "", topic: "" }, msg: null };
+// two English classes with two teachers: he practises for one of them at a time
+const TEACHERS = ["Szabó Emese", "PME"];
+const tchOf = w => w.teacher || "";
+const S = { tch: TEACHERS.includes(load("szf-tch", "")) ? load("szf-tch", "") : "", view: "home", by: "lesson", topics: new Set(), dsel: "", sel: new Set(), hard: false, incKnown: false, mode: "flash", dir: "en", count: 25, s: null, q: "", rep: "", add: { en: "", hu: "", L: "", topic: "" }, msg: null };
 function h(t, a, ...k) { const e = document.createElement(t); for (const [n, v] of Object.entries(a || {})) { if (v == null || v === false) continue; if (n.startsWith("on")) e.addEventListener(n.slice(2), v); else if (n === "class") e.className = v; else if (n === "value") e.value = v; else e.setAttribute(n, v === true && !n.startsWith("aria-") ? "" : String(v)); } for (const c of k.flat(9)) if (c != null && c !== false) e.append(c.nodeType ? c : String(c)); return e; }
 const sh = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const n = s => (s || "").toLowerCase().trim();
@@ -143,27 +148,31 @@ function dateMatch(c, sel) { if (!sel) return true; if (!c) return false; if (se
 const dlabel = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("hu-HU", { month: "short", day: "numeric" }); };
 const chip = (t, on, f) => h("button", { class: "chip", "aria-pressed": on, onclick: f }, t);
 function pool() {
-  let ws = W.slice();
+  let ws = TW().slice();
   if (S.by === "lesson" && S.sel.size) ws = ws.filter(w => S.sel.has(lk(w)));
   if (S.by === "topic" && S.topics.size) ws = ws.filter(w => S.topics.has(topicOf(w)));
   if (S.by === "date" && S.dsel) ws = ws.filter(w => dateMatch(w.c, S.dsel));
   if (S.hard) ws = ws.filter(hard); return ws;
+}
+function tchBox() {
+  return h("div", {}, h("div", { class: "lbl" }, "Melyik órára készülsz?"),
+    h("div", { class: "seg tch" }, [...TEACHERS.map(t => [t, t]), ["", "Mindkettő"]].map(([v, t]) => h("button", { "aria-pressed": S.tch === v, onclick: () => { S.tch = v; save("szf-tch", v); S.sel = new Set(); S.topics = new Set(); S.dsel = ""; R(); } }, t))));
 }
 function filterBox() {
   let chips;
   // many lessons: a drop-down grouped by book stays readable where a row of chips would not
   if (S.by === "lesson") {
     const groups = new Map(), cnt = {};
-    for (const w of W) { const L = lk(w); cnt[L] = (cnt[L] || 0) + 1; if (!groups.has(w.book)) groups.set(w.book, new Map()); groups.get(w.book).set(L, w.lesson); }
+    for (const w of TW()) { const L = lk(w); cnt[L] = (cnt[L] || 0) + 1; if (!groups.has(w.book)) groups.set(w.book, new Map()); groups.get(w.book).set(L, w.lesson); }
     chips = [h("select", { class: "inp", "aria-label": "Lecke", onchange: e => { S.sel = e.target.value ? new Set([e.target.value]) : new Set(); R(); } },
-      h("option", { value: "", selected: !S.sel.size }, `Mind (összes lecke, ${W.length} szó)`),
+      h("option", { value: "", selected: !S.sel.size }, `Mind (összes lecke, ${TW().length} szó)`),
       [...groups].map(([book, ls]) => h("optgroup", { label: book }, [...ls].map(([L, name]) => h("option", { value: L, selected: S.sel.has(L) }, `${name} (${cnt[L]})`)))))];
   }
   else if (S.by === "topic") {
-    const cnt = {}; for (const w of W) cnt[topicOf(w)] = (cnt[topicOf(w)] || 0) + 1;
+    const cnt = {}; for (const w of TW()) cnt[topicOf(w)] = (cnt[topicOf(w)] || 0) + 1;
     chips = [chip("Mind", S.topics.size === 0, () => { S.topics.clear(); R(); }), ...Object.keys(cnt).sort((a, b) => a.localeCompare(b, "hu")).map(t => chip(`${t} (${cnt[t]})`, S.topics.has(t), () => { S.topics.has(t) ? S.topics.delete(t) : S.topics.add(t); R(); }))];
   } else {
-    const days = {}; for (const w of W) if (w.c) { const k = dayOfMs(w.c); days[k] = (days[k] || 0) + 1; }
+    const days = {}; for (const w of TW()) if (w.c) { const k = dayOfMs(w.c); days[k] = (days[k] || 0) + 1; }
     chips = [["", "Mind"], ["today", "Ma"], ["7", "Elmúlt 7 nap"], ["30", "Elmúlt 30 nap"]].map(([v, t]) => chip(t, S.dsel === v, () => { S.dsel = v; R(); }))
       .concat(Object.keys(days).sort().reverse().slice(0, 8).map(k => chip(`${dlabel(k)} (${days[k]})`, S.dsel === k, () => { S.dsel = k; R(); })));
   }
@@ -307,7 +316,7 @@ function streakCard() {
 function report() {
   const days = allDays().slice(-60); const log = {}; for (const d of days) log[d] = logDay(d);
   const p = W.filter(w => pr(w).l).map(w => { const x = pr(w), k = (P[K(w)] || {}).k; return [w.book, w.lesson, w.en, x.b, x.r, x.w, x.l, k === 1 || k === 0 ? k : null]; });
-  const nw = OWN.map(o => [o.book, o.lesson, o.en, o.hu, o.c, o.topic || ""]);
+  const nw = OWN.map(o => [o.book, o.lesson, o.en, o.hu, o.c, o.topic || "", o.teacher || ""]);
   // answers he accepted himself go to the notebook too, so the word list stays the same in both places
   const o = W.flatMap(w => [...((P[K(w)] || {}).alt || []).map(a => [w.book, w.lesson, w.en, "hu", a]), ...((P[K(w)] || {}).altEn || []).map(a => [w.book, w.lesson, w.en, "en", a])]);
   save("szf-lastrep", Date.now());
@@ -341,13 +350,14 @@ function addOwn() {
   const A = S.add; const en = A.en.trim().slice(0, 100), hu = A.hu.trim().slice(0, 100);
   if (!en || !hu) { S.msg = { ok: false, t: "Az angol és a magyar szó is kell." }; R(); return; }
   const L = A.L || OWN_L;
-  const src = W.find(w => lk(w) === L);
+  const tch = TEACHERS.includes(A.tch) ? A.tch : (S.tch || TEACHERS[0]);
+  const src = W.find(w => lk(w) === L && tchOf(w) === tch);
   const book = src ? src.book : OWN_BOOK, lesson = src ? src.lesson : OWN_LESSON;
   const wk = x => n(x).replace(/[’‘`]/g, "'").replace(/^to\s+/, "").replace(/[.!?,;:]+$/, "").replace(/\s+/g, " ");
-  const dup = W.find(w => wk(w.en) === wk(en));
+  const dup = W.find(w => tchOf(w) === tch && wk(w.en) === wk(en));
   if (dup) { S.msg = { ok: false, t: `Ez a szó már megvan: ${lk(dup)} (${dup.hu}).` }; R(); return; }
-  OWN.push({ en, hu, book, lesson, pos: "", example: "", topic: A.topic || "Egyéb", own: true, c: Date.now() }); save("szf-own", OWN); rebuild();
-  S.add = { en: "", hu: "", L, topic: A.topic }; S.msg = { ok: true, t: "Hozzáadva: " + en };
+  OWN.push({ en, hu, book, lesson, teacher: tch, pos: "", example: "", topic: A.topic || "Egyéb", own: true, c: Date.now() }); save("szf-own", OWN); rebuild();
+  S.add = { en: "", hu: "", L, topic: A.topic, tch }; S.msg = { ok: true, t: "Hozzáadva: " + en };
   R(); const f = document.getElementById("a-en"); if (f) f.focus();
 }
 function R() { R0(); if (S.reward) app.append(rewardModal()); }
@@ -363,12 +373,14 @@ function R0() {
     h("div", {}, h("button", { class: "btn gh", onclick: () => { save("szf-nohint", true); R(); } }, "Rendben, megvan"))));
   if (S.view !== "play") app.append(h("div", { class: "nav" }, [["home", "Gyakorlás"], ["add", "Új szó"], ["list", "Szólista"], ["log", "Napló"]].map(([v, t]) => h("button", { "aria-pressed": S.view === v, onclick: () => { S.view = v; S.msg = null; R(); } }, t))));
   if (S.view === "add") {
-    const A = S.add; const opts = [...new Set([OWN_L, ...lessons])];
+    const A = S.add; if (!TEACHERS.includes(A.tch)) A.tch = S.tch || TEACHERS[0];
+    const opts = [...new Set([OWN_L, ...W.filter(w => tchOf(w) === A.tch).map(lk)])];
     app.append(h("div", { class: "card" },
       h("h2", {}, "Új szó felvétele"),
       h("div", { class: "mu sm" }, "Ha órán vagy a könyvben új szót találsz, írd be ide. A jelentéssel a szüleidhez is eljut, és bekerül a közös szólistába."),
       h("div", {}, h("div", { class: "lbl" }, "Angolul"), h("input", { class: "inp", id: "a-en", autocomplete: "off", autocapitalize: "off", spellcheck: "false", value: A.en, oninput: e => A.en = e.target.value, onkeydown: e => { if (e.key === "Enter") { e.preventDefault(); const x = document.getElementById("a-hu"); if (x) x.focus(); } } })),
       h("div", {}, h("div", { class: "lbl" }, "Magyarul"), h("input", { class: "inp", id: "a-hu", autocomplete: "off", value: A.hu, oninput: e => A.hu = e.target.value, onkeydown: e => { if (e.key === "Enter") { e.preventDefault(); addOwn(); } } })),
+      h("div", {}, h("div", { class: "lbl" }, "Melyik tanárhoz?"), h("div", { class: "seg tch" }, TEACHERS.map(t => h("button", { "aria-pressed": A.tch === t, onclick: () => { A.tch = t; A.L = ""; R(); } }, t)))),
       h("div", {}, h("div", { class: "lbl" }, "Témakör"), h("select", { class: "inp", id: "a-t", onchange: e => A.topic = e.target.value }, TOPICS.map(t => h("option", { value: t, selected: (A.topic || "Egyéb") === t }, t)))),
       h("div", {}, h("div", { class: "lbl" }, "Melyik leckéhez?"), h("select", { class: "inp", id: "a-l", onchange: e => A.L = e.target.value }, opts.map(L => h("option", { value: L, selected: (A.L || OWN_L) === L }, L)))),
       S.msg ? h("div", { class: "sm", style: `font-weight:600;color:var(${S.msg.ok ? "--g" : "--b"})` }, S.msg.t) : null,
@@ -382,8 +394,9 @@ function R0() {
   if (S.view === "list") {
     app.append(h("input", { class: "inp", type: "search", id: "q", placeholder: "Keresés…", value: S.q, oninput: e => { S.q = e.target.value; R(); document.getElementById("q").focus(); } }));
     const q = n(S.q);
+    app.append(tchBox());
     for (const L of lessons) {
-      const ws = W.filter(w => lk(w) === L && (!q || n(w.en).includes(q) || n(w.hu).includes(q)));
+      const ws = TW().filter(w => lk(w) === L && (!q || n(w.en).includes(q) || n(w.hu).includes(q)));
       if (!ws.length) continue;
       app.append(h("h2", {}, L), h("div", { class: "list" }, ws.map(w => { const on = known(w); return h("div", { class: "it3" + (on ? " kd" : "") }, h("span", {}, h("b", {}, w.en), sb(w.en), tag(w)), h("span", {}, w.hu), h("button", { class: "kn" + (on ? " on" : ""), "aria-pressed": on, title: on ? "Tudod: csak néha jön elő ismétlésnek. Koppints, ha mégis gyakorolnád." : "Jelöld, ha már tudod", onclick: () => { setKnown(w, !on); R(); } }, on ? "✓ tudom" : "tudom?")); })));
     }
@@ -420,7 +433,7 @@ function R0() {
     return;
   }
   if (S.view === "home" || !S.s) {
-    const p = pool(); const hw = W.filter(hard);
+    const p = pool(); const hw = TW().filter(hard);
     app.append(streakCard());
     app.append(h("div", { class: "mu sm" }, `${W.length} szó · ${W.filter(known).length} tudom ✓ · frissítve: ${DATA.date}`));
     // weekly nudge: changes on this phone reach the notebook only with a report
@@ -431,6 +444,7 @@ function R0() {
     if (hw.length) app.append(h("div", { class: "card row" }, h("div", { class: "grow" }, h("b", {}, `${hw.length} nehéz szó`), h("div", { class: "mu sm" }, "Ezeket rontottad el legutóbb. Gyakorold őket még egy kicsit.")),
       h("button", { class: "btn hd", onclick: () => start(hw.slice(0, 20)) }, "Gyakorlom")));
     app.append(h("div", { class: "card" },
+        tchBox(),
         filterBox(),
         h("label", { class: "row" }, h("input", { type: "checkbox", checked: S.hard, onchange: e => { S.hard = e.target.checked; R(); } }), "Csak a nehéz szavak"),
         h("div", { class: "mu sm" }, "Előbb az jön, ami nem ment, aztán a még nem tudott szavak. A tudottakból csak néhány, ismétlésnek. Dolgozat előtt válaszd ki a leckét vagy a témát, és a „mind” lehetőséget."),

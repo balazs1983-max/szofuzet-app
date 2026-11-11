@@ -50,7 +50,7 @@ def build(data):
         topic = str(w.get("topic") or "").strip()
         words.append({
             "en": en, "hu": hu, "pos": w.get("pos") or "", "example": w.get("example") or "",
-            "book": w.get("book") or "Egyéb", "lesson": w.get("lesson") or "Lecke nélkül",
+            "book": w.get("book") or "Egyéb", "lesson": w.get("lesson") or "Lecke nélkül", "teacher": str(w.get("teacher") or ""),
             "topic": topic if topic else "Egyéb", "c": num(w.get("created")), "known": bool(w.get("known") or w.get("kk")), "enAlt": [str(x) for x in (w.get("enAlt") or [])],
             # practice data stays out of the public site; a new phone gets it back from the parents' restore code
             "kb": 0, "kr": 0, "kw": 0, "kl": 0,
