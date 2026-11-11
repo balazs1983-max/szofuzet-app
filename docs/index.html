@@ -50,6 +50,7 @@ h2{font-size:19px;margin:0}
 .say{border:0;background:none;cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;vertical-align:middle;border-radius:8px}
 .fb{border-radius:10px;padding:10px 12px;font-size:15px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.fb.ok{background:var(--gs)}.fb.no{background:var(--bss)}
 .it3{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;padding:6px 14px;border-bottom:1px solid var(--li)}.it3:last-child{border:0}
+.lsn>summary{cursor:pointer;padding:2px 0}.lsn .list{margin-top:8px}.tagb{border:0;cursor:pointer;font-family:inherit}
 .fire{gap:10px}.flame{display:flex;align-items:center;gap:2px;font-size:28px;line-height:1}.flame b{font-size:26px;font-weight:800}.flame.off{filter:grayscale(1);opacity:.55}
 .bar.goal i{background:var(--g)}.days i.g{background:var(--g)}
 .pts{font-size:22px;font-weight:800;color:var(--bl)}
@@ -100,11 +101,13 @@ window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); S.bip 
 // two English classes with two teachers: he practises for one of them at a time
 const TEACHERS = ["Szabó Emese", "PME"];
 const tchOf = w => w.teacher || "";
-const S = { tch: TEACHERS.includes(load("szf-tch", "")) ? load("szf-tch", "") : "", view: "home", by: "lesson", topics: new Set(), dsel: "", sel: new Set(), hard: false, incKnown: false, mode: "flash", dir: "en", count: 25, s: null, q: "", rep: "", add: { en: "", hu: "", L: "", topic: "" }, msg: null };
+const S = { lb: "", ll: "", lt: "", lh: false, open: new Set(), tch: TEACHERS.includes(load("szf-tch", "")) ? load("szf-tch", "") : "", view: "home", by: "lesson", topics: new Set(), dsel: "", sel: new Set(), hard: false, incKnown: false, mode: "flash", dir: "en", count: 25, s: null, q: "", rep: "", add: { en: "", hu: "", L: "", topic: "" }, msg: null };
 function h(t, a, ...k) { const e = document.createElement(t); for (const [n, v] of Object.entries(a || {})) { if (v == null || v === false) continue; if (n.startsWith("on")) e.addEventListener(n.slice(2), v); else if (n === "class") e.className = v; else if (n === "value") e.value = v; else e.setAttribute(n, v === true && !n.startsWith("aria-") ? "" : String(v)); } for (const c of k.flat(9)) if (c != null && c !== false) e.append(c.nodeType ? c : String(c)); return e; }
 const sh = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const n = s => (s || "").toLowerCase().trim();
-const tag = w => hard(w) ? h("span", { class: "tag" }, "nehéz") : null;
+// a hard word leaves the list by itself after 3 right answers in a row; the tag shows how far he is
+const tag = w => hard(w) ? h("span", { class: "tag", title: "3 jó válasz egymás után, és kikerül a nehezek közül" }, `nehéz · ${box(w)}/3`) : null;
+function unHard(w) { const p = pr(w); P[K(w)] = { ...p, ...(P[K(w)] || {}), b: 3, l: Date.now() }; save("szf-p", P); }
 
 // ----- pronunciation -----
 const CAN_SAY = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
@@ -392,14 +395,41 @@ function R0() {
   }
   if (!W.length) { app.append(h("div", { class: "card" }, "Még nincsenek szavak. Az Új szó fülön felvehetsz sajátot.", h("div", {}, h("button", { class: "btn p", onclick: () => { S.view = "add"; R(); } }, "Új szó")))); return; }
   if (S.view === "list") {
-    app.append(h("input", { class: "inp", type: "search", id: "q", placeholder: "Keresés…", value: S.q, oninput: e => { S.q = e.target.value; R(); document.getElementById("q").focus(); } }));
-    const q = n(S.q);
+    // the list grows with every page, so it opens folded: material, lesson and topic narrow it down
     app.append(tchBox());
-    for (const L of lessons) {
-      const ws = TW().filter(w => lk(w) === L && (!q || n(w.en).includes(q) || n(w.hu).includes(q)));
-      if (!ws.length) continue;
-      app.append(h("h2", {}, L), h("div", { class: "list" }, ws.map(w => { const on = known(w); return h("div", { class: "it3" + (on ? " kd" : "") }, h("span", {}, h("b", {}, w.en), sb(w.en), tag(w)), h("span", {}, w.hu), h("button", { class: "kn" + (on ? " on" : ""), "aria-pressed": on, title: on ? "Tudod: csak néha jön elő ismétlésnek. Koppints, ha mégis gyakorolnád." : "Jelöld, ha már tudod", onclick: () => { setKnown(w, !on); R(); } }, on ? "✓ tudom" : "tudom?")); })));
+    app.append(h("input", { class: "inp", type: "search", id: "q", placeholder: "Keresés angolul vagy magyarul…", value: S.q, oninput: e => { S.q = e.target.value; R(); const x = document.getElementById("q"); x.focus(); } }));
+    const q = n(S.q), base = TW();
+    const books = [...new Set(base.map(w => w.book))].sort((a, b) => a.localeCompare(b, "hu", { numeric: true }));
+    if (S.lb && !books.includes(S.lb)) { S.lb = ""; S.ll = ""; }
+    const inB = base.filter(w => !S.lb || w.book === S.lb);
+    const lsn = [...new Set(inB.map(lk))];
+    if (S.ll && !lsn.includes(S.ll)) S.ll = "";
+    const tps = [...new Set(base.map(topicOf))].sort((a, b) => a.localeCompare(b, "hu"));
+    const sel = (lbl, val, opts, all, set) => h("div", {}, h("div", { class: "lbl" }, lbl), h("select", { class: "inp", onchange: e => { set(e.target.value); R(); } },
+      h("option", { value: "", selected: !val }, all), opts.map(([v, t]) => h("option", { value: v, selected: val === v }, t))));
+    const hardN = base.filter(hard).length;
+    app.append(h("div", { class: "card" },
+      sel("Anyag", S.lb, books.map(b => [b, b]), "Minden anyag", v => { S.lb = v; S.ll = ""; }),
+      sel("Lecke", S.ll, lsn.map(L => [L, S.lb ? L.slice(S.lb.length + 3) : L]), "Minden lecke", v => S.ll = v),
+      sel("Témakör", S.lt, tps.map(t => [t, t]), "Minden téma", v => S.lt = v),
+      h("label", { class: "row" }, h("input", { type: "checkbox", checked: S.lh, onchange: e => { S.lh = e.target.checked; R(); } }), `Csak a nehéz szavak (${hardN})`)));
+    const ws = inB.filter(w => (!S.ll || lk(w) === S.ll) && (!S.lt || topicOf(w) === S.lt) && (!S.lh || hard(w)) && (!q || n(w.en).includes(q) || n(w.hu).includes(q)));
+    const narrow = !!(q || S.ll || S.lh || ws.length <= 30);
+    app.append(h("div", { class: "row mu sm" }, h("span", { class: "grow" }, `${ws.length} szó`),
+      S.lb || S.ll || S.lt || S.lh || q ? h("button", { class: "btn gh sm", onclick: () => { S.lb = S.ll = S.lt = ""; S.lh = false; S.q = ""; R(); } }, "Szűrés törlése") : null));
+    for (const L of [...new Set(ws.map(lk))]) {
+      const lw = ws.filter(w => lk(w) === L), hn = lw.filter(hard).length;
+      const d = h("details", { class: "card lsn", open: narrow || S.open.has(L) },
+        h("summary", {}, h("b", {}, L), h("span", { class: "mu sm" }, ` · ${lw.length} szó`), hn ? h("span", { class: "tag" }, `${hn} nehéz`) : null),
+        h("div", { class: "list" }, lw.map(w => { const on = known(w); return h("div", { class: "it3" + (on ? " kd" : "") },
+          h("span", {}, h("b", {}, w.en), sb(w.en), hard(w) ? h("button", { class: "tag tagb", title: "Koppints, ha már megtanultad", onclick: () => { if (confirm(`Kiveszed a „${w.en}” szót a nehezek közül? Csak akkor, ha már tényleg megy.`)) { unHard(w); R(); } } }, `nehéz · ${box(w)}/3 ✕`) : null),
+          h("span", {}, w.hu),
+          h("button", { class: "kn" + (on ? " on" : ""), "aria-pressed": on, title: on ? "Tudod: csak néha jön elő ismétlésnek. Koppints, ha mégis gyakorolnád." : "Jelöld, ha már tudod", onclick: () => { setKnown(w, !on); R(); } }, on ? "✓ tudom" : "tudom?")); })));
+      d.addEventListener("toggle", () => { if (d.open) S.open.add(L); else S.open.delete(L); });
+      app.append(d);
     }
+    if (!ws.length) app.append(h("div", { class: "mu sm" }, "Nincs ilyen szó."));
+    app.append(h("div", { class: "mu sm" }, "„nehéz · 1/3”: ennyi jó válasz van meg egymás után. 3 után magától kikerül a nehezek közül. Ha már biztosan tudod, koppints rá, és kiveheted."));
     return;
   }
   if (S.view === "log") {
